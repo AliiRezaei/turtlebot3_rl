@@ -10,13 +10,23 @@ using namespace std;
 
 // TurtleBot3 constructor
 TurtleBot3::TurtleBot3() {
+  
+  // initializing node :
   n = ros::NodeHandle("~");
+  
+  // laser topic and subscriber :
   laser_topic = "/scan";
   laser_sub = n.subscribe(laser_topic, 10, &TurtleBot3::laser_callback, this);
+  
+  // velocity command topic and publisher :
   vel_topic = "/cmd_vel";
   vel_pub = n.advertise<geometry_msgs::Twist>(n.resolveName(vel_topic), 1);
+  
+  // odometry topic and subscriber :
   odom_topic = "/odom";
   odom_sub = n.subscribe(odom_topic, 10, &TurtleBot3::odom_callback, this);
+  
+  // log init info :
   ROS_INFO("Initializing node .................................");
   usleep(2000000);
   ros::spinOnce();
@@ -28,12 +38,18 @@ void TurtleBot3::laser_callback(
   // ROS_INFO("Laser value: %f", laser_range);
 }
 void TurtleBot3::odom_callback(const nav_msgs::Odometry::ConstPtr &odom_msg) {
+  
+  // turtlebot3 position along x axis :
   x_pos = odom_msg->pose.pose.position.x;
+  
+  // turtlebot3 position along y axis :
   y_pos = odom_msg->pose.pose.position.y;
+  
+  // turtlebot3 position along z axis :
   z_pos = odom_msg->pose.pose.position.z;
+  
+  // turtlebot3 orientation along z axis (theta):
   z_ori = odom_msg->pose.pose.orientation.z;
-  // ROS_INFO_STREAM("Odometry: x=" << x_pos << " y=" << y_pos << " z=" <<
-  // z_pos);
 }
 void TurtleBot3::move() {
   // Rate of publishing
@@ -54,23 +70,34 @@ void TurtleBot3::move() {
 }
 
 void TurtleBot3::move_forward(int time) {
-  // Rate of publishing
-  ros::Rate rate(10);
+  
+  // rate of publishing :
+  int freq = 10;
+  ros::Rate rate(freq);
 
+  // start time and duration :
   ros::Time start_time = ros::Time::now();
   ros::Duration timeout(time);
+
+  // go forward for "time" seconds :
   while (ros::Time::now() - start_time < timeout) {
     ROS_INFO_STREAM("Moving forward ........... ");
     ros::spinOnce();
+    
+    // adjust velocity and publish them :
     vel_msg.linear.x = 0.2;
     vel_msg.angular.z = 0.0;
     vel_pub.publish(vel_msg);
+
+    // waiting :
     rate.sleep();
   }
+
+  // publish zero velocity command :
   vel_msg.linear.x = 0.0;
   vel_msg.angular.z = 0.0;
   vel_pub.publish(vel_msg);
-}
+} // end of move_forward
 
 void TurtleBot3::move_forward_meters(float meters) 
 {
