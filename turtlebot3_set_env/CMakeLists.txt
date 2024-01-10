@@ -155,6 +155,9 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/turtlebot3_set_env_node.cpp)
 
+add_executable(turtlebot3_move_forward src/turtlebot3_move_forward.cpp)
+target_link_libraries(turtlebot3_move_forward ${catkin_LIBRARIES})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
