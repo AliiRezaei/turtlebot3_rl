@@ -12,30 +12,44 @@ using namespace std;
 
 class TurtleBot3 {
 private:
-  // Communicate with nodes
+  // create node handler for communicating with nodes :
   ros::NodeHandle n;
-  // Laser data
+
+  // laser data :
   ros::Subscriber laser_sub;
   std::vector<float> laser_range;
   std::string laser_topic;
-  // Velocity data
+  
+  // velocity data :
   ros::Publisher vel_pub;
   geometry_msgs::Twist vel_msg;
   std::string vel_topic;
-  // Odometry data
+  
+  // odometry data :
   ros::Subscriber odom_sub;
   std::string odom_topic;
-  float x_pos;
-  float y_pos;
-  float z_pos;
-  float z_ori;
+  float x_pos; // position along x axis
+  float y_pos; // position along y axis
+  float z_pos; // position along z axis
+  float z_ori; // orientation along z axis
 
+  // private methods :
+  // laser data subscriber callback :
   void laser_callback(const sensor_msgs::LaserScan::ConstPtr &laser_msg);
+  
+  // odometry data subscriber callback :
   void odom_callback(const nav_msgs::Odometry::ConstPtr &odom_msg);
 
 public:
+  // public methods :
+
+  // constructor :
   TurtleBot3();
+  
+  // move forward for 2 seconds :
   void move();
+
+  // move forward for n_secs seconds :
   void move_forward(int n_secs);
   void move_forward_meters(float meters);
   void move_backwards(int n_secs);
