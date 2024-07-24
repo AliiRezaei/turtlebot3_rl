@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(turtlebot3_set_env)
+project(turtlebot3_rl)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 # catkin_package(
 # #  INCLUDE_DIRS include
-# #  LIBRARIES turtlebot3_set_env
+# #  LIBRARIES turtlebot3_rl
 # #  CATKIN_DEPENDS roscpp
 # #  DEPENDS system_lib
 # )
@@ -136,7 +136,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/turtlebot3_set_env.cpp
+#   src/${PROJECT_NAME}/turtlebot3_rl.cpp
 # )
 
 add_library(${PROJECT_NAME}
@@ -153,10 +153,25 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/turtlebot3_set_env_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/turtlebot3_rl_node.cpp)
 
-add_executable(turtlebot3_move_forward src/turtlebot3_move_forward.cpp)
-target_link_libraries(turtlebot3_move_forward ${catkin_LIBRARIES})
+
+
+
+
+# add_executable(TurtleMoveTest src/TurtleMove.cpp)
+# target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
+
+
+
+add_executable(myTestCode src/myTestCode.cpp)
+target_link_libraries(myTestCode ${catkin_LIBRARIES})
+
+
+
+
+
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -232,7 +247,7 @@ install(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_turtlebot3_set_env.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_turtlebot3_rl.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
