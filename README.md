@@ -11,4 +11,3 @@ sudo apt-get install ros-noetic-turtlebot3-gazebo
 ```
 export TURTLEBOT3_MODEL=burger
 ```
-
