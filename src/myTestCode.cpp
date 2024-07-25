@@ -269,10 +269,33 @@ float eucliden_distance(float P1[], float P2[]) {
 
 
 
-int calculate_rewards(int previous_distance, int current_distance){
-  if(current_distance < previous_distance)      {return -5;}
-  else if(current_distance > previous_distance) {return -5;}
-  else                                          {return  1;}
+int calculate_rewards(float current_position[], float previous_position[], float goal_position[], float collision, int action){
+  int reward = 0;
+  float reach = eucliden_distance(current_position, goal_position);
+  if(reach <= 0.01 ) {
+    reward += 100;
+  }
+  else {
+    float previous_distance = eucliden_distance(previous_position, goal_position);
+    float current_distance  = eucliden_distance(current_position, goal_position);
+    if(current_distance < previous_distance) {
+      reward += 1;
+    }
+    else {
+      reward -= 1;
+    }
+
+    if(collision < 0.1) {
+      reward -= 50;
+    }
+
+    reward -= 1;
+
+    if((action == 3)||(action == 4)) {
+      reward -= 2;
+    }
+  }
+  return reward;
 }
 
 
@@ -332,7 +355,10 @@ int main(int argc, char **argv)
   int action_count[] = {0, 0, 0, 0, 0};
   float epsilon = 0.05;
 
-  float previous_distance = robot.get_laser(0);
+  // float previous_distance = robot.get_laser(0);
+  float previous_position[2];
+  previous_position[0] = robot.get_position(1);
+  previous_position[1] = robot.get_position(2);
 
   while(1){
     float rand = randUniform(0.0, 1.0);
@@ -384,9 +410,26 @@ int main(int argc, char **argv)
       break;
     }
 
-  float current_distance = robot.get_laser(0);
-  int reward = calculate_rewards(previous_distance, current_distance);
+  float * collision = robot.get_laser_full();
+  int maxDegrees = 720;
+  float nearest_obstacle_distance = 1000.0;
+  for(int i=0; i<maxDegrees; i++) {
+    if(*(collision + i) < nearest_obstacle_distance) {
+      nearest_obstacle_distance = *(collision + i);
+    }
+  }
+  // int reward = calculate_rewards(previous_distance, current_distance);
+  
+  float current_position[2];
+  current_position[0] = robot.get_position(1);
+  current_position[1] = robot.get_position(2);
+
+  float goal_position[2] = {-1.0, 1.0};
+  
+  int reward = calculate_rewards(current_position, previous_position, goal_position, nearest_obstacle_distance, action);
   rewards[action] = rewards[action] + reward;
+
+  cout << reward << endl;
 
 
   }
