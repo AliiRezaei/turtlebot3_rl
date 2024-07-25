@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <random>
+#include <iostream>
 using namespace std;
 
 // TurtleBot3 constructor
@@ -167,7 +168,6 @@ void TurtleBot3::turn(string clock, int n_secs) {
 
   while (ros::Time::now() - start_time < timeout) {
     ros::spinOnce();
-    cout  << z_ori << endl;
     vel_msg.linear.x = 0.0;
     vel_msg.angular.z = WZ;
     vel_pub.publish(vel_msg);
@@ -249,6 +249,25 @@ float *TurtleBot3::get_laser_full() {
 // }
 
 
+// template <typename inputType> int array_length(inputType arr[]) {
+//   int len = *(&arr + 1) - arr;
+//   return len;
+// }
+
+
+
+
+
+
+float eucliden_distance(float P1[], float P2[]) {
+  float norm = 0.0;
+  for(int i=0; i<2; i++) {
+    norm += (P1[i] - P2[i]) * (P1[i] - P2[i]);
+  }
+  return sqrt(norm);
+}
+
+
 
 int calculate_rewards(int previous_distance, int current_distance){
   if(current_distance < previous_distance)      {return -5;}
@@ -321,12 +340,12 @@ int main(int argc, char **argv)
 
     if(rand < epsilon) {
       // select a random acttion :
-      action = randInt(0, 2);
+      action = randInt(0, 4);
     }
     else {
       float *action_values_ptr = calculate_action_values(rewards, action_count);
       // calculate argmax action_values :
-      long float max_action_values    = - 100000.0;
+      double max_action_values    = - 100000.0;
       int   argmax_action_values =       0;
       for(int i=0; i<5; i++){
         if(*(action_values_ptr+i) > max_action_values){
