@@ -242,6 +242,14 @@ float *TurtleBot3::get_laser_full() {
 }
 
 
+// int calculate_rewards(int previous_distance, int current_distance){
+//   if(current_distance < previous_distance)      {return -5;}
+//   else if(current_distance > previous_distance) {return -5;}
+//   else                                          {return  1;}
+// }
+
+
+
 int calculate_rewards(int previous_distance, int current_distance){
   if(current_distance < previous_distance)      {return -5;}
   else if(current_distance > previous_distance) {return -5;}
@@ -249,12 +257,18 @@ int calculate_rewards(int previous_distance, int current_distance){
 }
 
 
+
+
+
+
+
+
 float *calculate_action_values(int reward[], int action_count[]){
   // init action_values :
-  float action_values[3];
+  float action_values[5];
 
   /// calculate action_values :
-  for(int i=0; i<3; i++){
+  for(int i=0; i<5; i++){
     if(action_count[i] == 0) {
       action_values[i] = 0.0;
     }
@@ -295,8 +309,8 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "FuckingNode");
   TurtleBot3 robot;
 
-  int rewards[] = {0, 0, 0};
-  int action_count[] = {0, 0, 0};
+  int rewards[] = {0, 0, 0, 0, 0};
+  int action_count[] = {0, 0, 0, 0, 0};
   float epsilon = 0.05;
 
   float previous_distance = robot.get_laser(0);
@@ -312,9 +326,9 @@ int main(int argc, char **argv)
     else {
       float *action_values_ptr = calculate_action_values(rewards, action_count);
       // calculate argmax action_values :
-      float max_action_values    = - 100.0;
+      long float max_action_values    = - 100000.0;
       int   argmax_action_values =       0;
-      for(int i=0; i<3; i++){
+      for(int i=0; i<5; i++){
         if(*(action_values_ptr+i) > max_action_values){
           max_action_values = *(action_values_ptr+i);
           argmax_action_values = i;
@@ -337,6 +351,18 @@ int main(int argc, char **argv)
     else if (action == 2) {
       // move backward :
       robot.move_backwards(1);
+    }
+    else if (action == 3) {
+      // turn right :
+      robot.turn("clockwise", 1);
+    }
+    else if (action == 4) {
+      // turn left :
+      robot.turn("counterclockwise", 1);
+    }
+    else {
+      ROS_INFO_STREAM("Unrecognized Action ");
+      break;
     }
 
   float current_distance = robot.get_laser(0);
