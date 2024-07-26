@@ -323,7 +323,14 @@ template<typename InputType> float *linspace(InputType a, InputType b, int n) {
 }
 
 
+double sum_array(double arr[]) {
 
+  double sum = 0.0;
+  for(int i=0; i<5; i++) {
+    sum += arr[i];
+  }
+  return sum;
+}
 
 
 float eucliden_distance(float P1[], float P2[]) {
@@ -338,34 +345,38 @@ float eucliden_distance(float P1[], float P2[]) {
 
 
 
-int calculate_rewards(float current_position[], float previous_position[], float goal_position[], float collision, int action){
-  int reward = 0;
+float calculate_rewards(float current_position[], float previous_position[], float goal_position[], float collision, int action){
+  float reward = 0.0;
   if(eucliden_distance(current_position, goal_position) <= 0.05 && action == 0) {
-    reward += 500;
+    reward += 50.0;
   }
   else if(eucliden_distance(current_position, goal_position) <= 0.01 ) {
-    reward += 100;
+    reward += 10.0;
   }
   else {
     float previous_distance = eucliden_distance(previous_position, goal_position);
     float current_distance  = eucliden_distance(current_position, goal_position);
     if(current_distance < previous_distance) {
-      reward += 1;
+      // reward += 5.0;
+      reward += current_distance;
     }
     else {
-      reward -= 1;
+      // reward -= 5.0;
+      reward -= current_distance;
     }
 
-    if(collision < 0.05) {
-      reward -= 10;
-    }
+    // if(collision < 0.05) {
+    //   reward -= 10.0;
+    // }
 
-    reward -= 1;
+    // reward -= 1.0;
 
     if((action == 3)||(action == 4)) {
-      reward -= 2;
+      reward -= 20.0;
     }
   }
+
+  cout << "current position (x,y) = (" << current_position[0] << "," << current_position[1] << ")" << " , Distance = " << eucliden_distance(current_position, goal_position);
   return reward;
 }
 
@@ -380,22 +391,26 @@ int calculate_rewards(float current_position[], float previous_position[], float
 
 
 
-float *calculate_action_values(double reward[], long int action_count[]){
+float *calculate_action_values(double reward[], double action_count[]){
   // init action_values :
   // size_t n = array_length(reward);
-  float a[5];
+  // float a[5];
   // float *action_values = a;
   float *action_values = new float[5];
 
   /// calculate action_values :
   for(int i=0; i<5; i++){
-    if(action_count[i] == 0) {
+    if(action_count[i] == 0.0) {
       action_values[i] = 0.0;
     }
     else {
       action_values[i] = reward[i] / action_count[i];
+      // double sum_reward = sum_array(reward);
+      // action_values[i] = sum_reward / action_count[i];
     }
+    cout << "Action Value " << i << " = " << *(action_values + i) << endl;
   }
+  cout << endl;
   return action_values;
 }
 
@@ -438,16 +453,19 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "FuckingNode");
   TurtleBot3 robot;
-  ros::Rate rate(10);
+  ros::Rate rate(1);
 
   double rewards[] = {0.0, 0.0, 0.0, 0.0, 0.0};
-  long int action_count[] = {0, 0, 0, 0, 0};
+  double action_count[] = {0.0, 0.0, 0.0, 0.0, 0.0};
   float epsilon = 0.05;
+  int randomStatus = 0;
 
   // float previous_distance = robot.get_laser(0);
   float previous_position[2];
   previous_position[0] = robot.get_position(1);
   previous_position[1] = robot.get_position(2);
+
+  int episodCounter = 0;
 
   while(1){
     float rand = randUniform(0.0, 1.0);
@@ -456,24 +474,31 @@ int main(int argc, char **argv)
     if(rand < epsilon) {
       // select a random acttion :
       action = randInt(0, 4);
-      cout << "Random!" << endl;
+      randomStatus = 1;
     }
     else {
+      randomStatus = 0;
       float *action_values_ptr = calculate_action_values(rewards, action_count);
       // calculate argmax action_values :
       double max_action_values    = - 100000.0;
       int   argmax_action_values =       0;
       for(int i=0; i<5; i++){
+
+
+        *(action_values_ptr + i) = *(action_values_ptr + i) + rewards[i];
+
+
         if(*(action_values_ptr+i) > max_action_values){
           max_action_values = *(action_values_ptr+i);
           argmax_action_values = i;
         }
       }
       // select optimal action :
-      cout << max_action_values << endl;
+      // cout << max_action_values << endl;
       action = argmax_action_values;
     }
 
+    
     
 
     if (action == 0) {
@@ -490,48 +515,67 @@ int main(int argc, char **argv)
     }
     else if (action == 3) {
       // turn right :
-      robot.turn_degree(90.0);
+      // robot.turn_degree(90.0);
+      robot.stop_moving();
     }
     else if (action == 4) {
       // turn left :
-      robot.turn_degree(-90.0);
+      // robot.turn_degree(-90.0);
+      robot.stop_moving();
     }
     else {
       // ROS_INFO_STREAM("Unrecognized Action ");
       break;
+      }
+
+    float *collision = robot.get_laser_full();
+    int maxDegrees = 360;
+    double nearest_obstacle_distance = 100000.0;
+    for(int i=0; i<maxDegrees; i+=5) {
+      if(*(collision + i) < nearest_obstacle_distance) {
+        nearest_obstacle_distance = *(collision + i);
+      }
     }
 
-  float *collision = robot.get_laser_full();
-  int maxDegrees = 360;
-  double nearest_obstacle_distance = 100000.0;
-  for(int i=0; i<maxDegrees; i+=5) {
-    if(*(collision + i) < nearest_obstacle_distance) {
-      nearest_obstacle_distance = *(collision + i);
-    }
-  }
-  
-  float current_position[2];
-  current_position[0] = robot.get_position(1);
-  current_position[1] = robot.get_position(2);
+    float current_position[2];
+    current_position[0] = robot.get_position(1);
+    current_position[1] = robot.get_position(2);
 
-  float goal_position[] = {-2.0, 1.0};
+    float goal_position[] = {-1.0, 0.0};
 
-  int reward = calculate_rewards(current_position, previous_position, goal_position, nearest_obstacle_distance, action);
-  rewards[action] = rewards[action] + reward;
-  action_count[action] = action_count[action] + 1;
-  
+    float reward = calculate_rewards(current_position, previous_position, goal_position, nearest_obstacle_distance, action);
+    float gamma = 1.0;
+    rewards[action] = gamma * rewards[action] + reward;
+    // rewards[action] = rewards[action] + reward;
+    action_count[action] = action_count[action] + 1.0;
 
-  // for(int i=0; i<maxDegrees; i+=1) {
-  //   cout << "i = " << i << ", collision = " << *(collision + i) << endl;
-  // }
+    // cout << "reward = " << reward << endl;
 
-  // cout << reward << endl;
-  // delete[] action_values_ptr;
 
-  // rate.sleep();
+    // for(int i=0; i<maxDegrees; i+=1) {
+    //   cout << "i = " << i << ", collision = " << *(collision + i) << endl;
+    // }
 
+    // cout << reward << endl;
+    // delete[] action_values_ptr;
+
+    rate.sleep();
+
+    // cout << endl;
+    // for(int i=0; i<5; i++){
+    //   // cout << i << " th elemnt of action values = " << *(action_values_ptr+i) << " , count = " << action_count[i] << " , reward = " << rewards[i] << endl;
+    //   cout << i << " th elemnt : " << " , count = " << action_count[i] << " , reward = " << rewards[i] << endl;
+    //   cout << "gift reward = " << reward << "selected action = " << action << "Random? " << randomStatus << endl;
+    // }
+
+
+
+
+
+    cout << endl;
+    cout << episodCounter++ << " , gift reward = " << reward << " , selected action = " << action << " , Random? " << randomStatus << endl;
 
 
   }
   return 0;
-}
+} 
