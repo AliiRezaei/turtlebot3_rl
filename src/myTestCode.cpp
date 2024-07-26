@@ -29,7 +29,7 @@ TurtleBot3::TurtleBot3() {
   odom_sub = n.subscribe(odom_topic, 10, &TurtleBot3::odom_callback, this);
   
   // log init info :
-  ROS_INFO("Initializing node .................................");
+  // ROS_INFO("Initializing node .................................");
   usleep(2000000);
   ros::spinOnce();
 }
@@ -37,7 +37,7 @@ TurtleBot3::TurtleBot3() {
 void TurtleBot3::laser_callback(
     const sensor_msgs::LaserScan::ConstPtr &laser_msg) {
   laser_range = laser_msg->ranges;
-  // ROS_INFO("Laser value: %f", laser_range);
+  // // ROS_INFO("Laser value: %f", laser_range);
 }
 void TurtleBot3::odom_callback(const nav_msgs::Odometry::ConstPtr &odom_msg) {
   
@@ -50,8 +50,28 @@ void TurtleBot3::odom_callback(const nav_msgs::Odometry::ConstPtr &odom_msg) {
   // turtlebot3 position along z axis :
   z_pos = odom_msg->pose.pose.position.z;
   
-  // turtlebot3 orientation along z axis (theta):
-  z_ori = odom_msg->pose.pose.orientation.z;
+  // turtlebot3 quaternion x_quat:
+  x_quat = odom_msg->pose.pose.orientation.x;
+
+  // turtlebot3 quaternion y_quat:
+  y_quat = odom_msg->pose.pose.orientation.y;
+  
+  // turtlebot3 quaternion z_quat:
+  z_quat = odom_msg->pose.pose.orientation.z;
+  
+  // turtlebot3 quaternion y_quat:
+  w_quat = odom_msg->pose.pose.orientation.w;
+
+  Quaternion2RollPitchYaw();
+
+}
+
+void TurtleBot3::Quaternion2RollPitchYaw() {
+
+  roll   = atan2(2.0*(y_quat*z_quat + w_quat*x_quat), w_quat*w_quat - x_quat*x_quat - y_quat*y_quat + z_quat*z_quat);
+  pitch = asin(-2.0*(x_quat*z_quat - w_quat*y_quat));
+  yaw  = atan2(2.0*(x_quat*y_quat + w_quat*z_quat), w_quat*w_quat + x_quat*x_quat - y_quat*y_quat - z_quat*z_quat);
+
 }
 void TurtleBot3::move() {
   // Rate of publishing
@@ -83,11 +103,12 @@ void TurtleBot3::move_forward(int time) {
 
   // go forward for "time" seconds :
   while (ros::Time::now() - start_time < timeout) {
-    ROS_INFO_STREAM("Moving forward ........... ");
+    // ROS_INFO_STREAM("Moving forward ........... ");
     ros::spinOnce();
     
     // adjust velocity and publish them :
     vel_msg.linear.x = 0.2;
+    vel_msg.linear.y = 0.0;
     vel_msg.angular.z = 0.0;
     vel_pub.publish(vel_msg);
 
@@ -103,7 +124,7 @@ void TurtleBot3::move_forward(int time) {
 
 void TurtleBot3::move_forward_meters(float meters) 
 {
-  ROS_INFO_STREAM("Robot has started from x = " << x_pos);
+  // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
 
   // rate of publishing :
   ros::Rate rate(10);
@@ -111,13 +132,15 @@ void TurtleBot3::move_forward_meters(float meters)
 
   // target position and stop criteria :
   float x_target = x_pos + meters;
-  float eps = 0.001;
+  double eps = 0.0001;
 
   // go forward until reaching target position :
   while (x_target - x_pos > eps) {
-    ROS_INFO_STREAM("Moving forward " << meters << " meters");
+    // ROS_INFO_STREAM("Moving forward " << meters << " meters");
     ros::spinOnce();
     vel_msg.linear.x = 0.2;
+    // vel_msg.linear.x = 0.3 * (x_target - x_pos);
+    vel_msg.linear.y = 0.0;
     vel_msg.angular.z = 0.0;
     vel_pub.publish(vel_msg);
     rate.sleep();
@@ -130,19 +153,20 @@ void TurtleBot3::move_forward_meters(float meters)
   
   // print robot moving status :
   ros::Time end_time = ros::Time::now();
-  ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
+  // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
 }
 
-void TurtleBot3::move_backwards(int time) {
+void TurtleBot3::move_backward(int time) {
   // Rate of publishing
   ros::Rate rate(10);
 
   ros::Time start_time = ros::Time::now();
   ros::Duration timeout(time);
   while (ros::Time::now() - start_time < timeout) {
-    ROS_INFO_STREAM("Moving backwards ........... ");
+    // ROS_INFO_STREAM("Moving backwards ........... ");
     ros::spinOnce();
-    vel_msg.linear.x = -0.5;
+    vel_msg.linear.x = -0.2;
+    vel_msg.linear.y = 0.0;
     vel_msg.angular.z = 0.0;
     vel_pub.publish(vel_msg);
     rate.sleep();
@@ -152,6 +176,40 @@ void TurtleBot3::move_backwards(int time) {
   vel_pub.publish(vel_msg);
 }
 
+void TurtleBot3::move_backward_meters(float meters) 
+{
+  // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
+
+  // rate of publishing :
+  ros::Rate rate(10);
+  ros::Time start_time = ros::Time::now();
+
+  // target position and stop criteria :
+  float x_target = x_pos - meters;
+  double eps = 0.0001;
+
+  // go forward until reaching target position :
+  while (x_pos - x_target > eps) {
+    // ROS_INFO_STREAM("Moving forward " << meters << " meters");
+    ros::spinOnce();
+    vel_msg.linear.x = -0.2;
+    // vel_msg.linear.x = -0.3 * (x_pos - x_target);
+    vel_msg.linear.y = 0.0;
+    vel_msg.angular.z = 0.0;
+    vel_pub.publish(vel_msg);
+    rate.sleep();
+  }
+
+  // stop moving :
+  vel_msg.linear.x = 0.0;
+  vel_msg.angular.z = 0.0;
+  vel_pub.publish(vel_msg);
+  
+  // print robot moving status :
+  ros::Time end_time = ros::Time::now();
+  // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
+}
+
 void TurtleBot3::turn(string clock, int n_secs) {
   ros::Rate rate(10);
   ros::Time start_time = ros::Time::now();
@@ -159,10 +217,10 @@ void TurtleBot3::turn(string clock, int n_secs) {
 
   double WZ = 0.0;
   if (clock == "clockwise") {
-    ROS_INFO_STREAM("Turning clockwise..............");
+    // ROS_INFO_STREAM("Turning clockwise..............");
     WZ = -2.5;
   } else if (clock == "counterclockwise") {
-    ROS_INFO_STREAM("Turning counterclockwise ........... ");
+    // ROS_INFO_STREAM("Turning counterclockwise ........... ");
     WZ = 2.5;
   }
 
@@ -178,37 +236,38 @@ void TurtleBot3::turn(string clock, int n_secs) {
   vel_pub.publish(vel_msg);
 }
 
-void TurtleBot3::turn_degree(int deg)
+void TurtleBot3::turn_degree(float deg)
 {
   // Rate of publishing
   ros::Rate rate(10);
 
-  float theta_now = z_ori * 3.1415;
-  float theta_target = deg * 3.1415 / 180.0 + theta_now;
+  double theta_target = deg * 3.14159265 / 180.0 + yaw;
 
   int sign_theta = 0;
-  if(deg > 0) {sign_theta =  1;}
-  if(deg < 0) {sign_theta = -1;}
+  if(deg > 0.0) {sign_theta =  1;}
+  if(deg < 0.0) {sign_theta = -1;}
 
-  float eps = 0.01;
-  while(theta_target - z_ori * 3.1415 > eps)
+  double eps = 0.0001;
+  while(sign_theta * (theta_target - yaw) > eps)
   {
     ros::spinOnce();
     vel_msg.linear.x = 0.0;
-    vel_msg.angular.z = sign_theta * 1.5;
+    vel_msg.linear.y = 0.0;
+    vel_msg.angular.z = sign_theta * 0.3;
     vel_pub.publish(vel_msg);
-    ROS_INFO_STREAM("Turning " << deg << " degrees");
-    cout << z_ori << endl;
+    // ROS_INFO_STREAM("Turning " << deg << " degrees");
     rate.sleep(); 
   }
   vel_msg.linear.x = 0.0;
+  vel_msg.linear.y = 0.0;
   vel_msg.angular.z = 0.0;
   vel_pub.publish(vel_msg);
 }
 
 void TurtleBot3::stop_moving() {
-  ROS_INFO_STREAM("Stopping the robot ........... ");
+  // ROS_INFO_STREAM("Stopping the robot ........... ");
   vel_msg.linear.x = 0.0;
+  vel_msg.linear.y = 0.0;
   vel_msg.angular.z = 0.0;
   vel_pub.publish(vel_msg);
 }
@@ -237,29 +296,39 @@ double TurtleBot3::get_time() {
 float TurtleBot3::get_laser(int index) { return laser_range[index]; }
 
 float *TurtleBot3::get_laser_full() {
-  float *laser_range_pointer = laser_range.data();
-  return laser_range_pointer;
+  float *laser_range_ptr = laser_range.data();
+  return laser_range_ptr;
 }
 
 
-// int calculate_rewards(int previous_distance, int current_distance){
-//   if(current_distance < previous_distance)      {return -5;}
-//   else if(current_distance > previous_distance) {return -5;}
-//   else                                          {return  1;}
+
+
+
+
+// template <typename InputType, size_t N> size_t array_length(InputType (&arr)[N]) {
+//     return N;
 // }
 
 
-// template <typename inputType> int array_length(inputType arr[]) {
-//   int len = *(&arr + 1) - arr;
-//   return len;
-// }
 
+template<typename InputType> float *linspace(InputType a, InputType b, int n) {
+
+    float step_size = (b - a) / (n - 1.0);
+    float* sequence = new float[n];
+
+    for(int i = 0; i < n; i++) {
+        sequence[i] = a + i * step_size;
+    }
+    return sequence;
+}
 
 
 
 
 
 float eucliden_distance(float P1[], float P2[]) {
+  // size_t lenP1 = array_length(P1);
+  // cout << lenP1 << endl;
   float norm = 0.0;
   for(int i=0; i<2; i++) {
     norm += (P1[i] - P2[i]) * (P1[i] - P2[i]);
@@ -271,8 +340,10 @@ float eucliden_distance(float P1[], float P2[]) {
 
 int calculate_rewards(float current_position[], float previous_position[], float goal_position[], float collision, int action){
   int reward = 0;
-  float reach = eucliden_distance(current_position, goal_position);
-  if(reach <= 0.01 ) {
+  if(eucliden_distance(current_position, goal_position) <= 0.05 && action == 0) {
+    reward += 500;
+  }
+  else if(eucliden_distance(current_position, goal_position) <= 0.01 ) {
     reward += 100;
   }
   else {
@@ -285,8 +356,8 @@ int calculate_rewards(float current_position[], float previous_position[], float
       reward -= 1;
     }
 
-    if(collision < 0.1) {
-      reward -= 50;
+    if(collision < 0.05) {
+      reward -= 10;
     }
 
     reward -= 1;
@@ -300,14 +371,21 @@ int calculate_rewards(float current_position[], float previous_position[], float
 
 
 
+// int calculate_rewards(int previous_distance, int current_distance){
+//   if(current_distance < previous_distance)      {return -5;}
+//   else if(current_distance > previous_distance) {return -5;}
+//   else                                          {return  1;}
+// }
 
 
 
 
-
-float *calculate_action_values(int reward[], int action_count[]){
+float *calculate_action_values(double reward[], long int action_count[]){
   // init action_values :
-  float action_values[5];
+  // size_t n = array_length(reward);
+  float a[5];
+  // float *action_values = a;
+  float *action_values = new float[5];
 
   /// calculate action_values :
   for(int i=0; i<5; i++){
@@ -318,8 +396,7 @@ float *calculate_action_values(int reward[], int action_count[]){
       action_values[i] = reward[i] / action_count[i];
     }
   }
-  float *action_values_ptr = action_values;
-  return action_values_ptr;
+  return action_values;
 }
 
 
@@ -343,16 +420,28 @@ float randInt(int low, int up){
 
 
 
+// int main(int argc, char **argv)
+// {
+//   ros::init(argc, argv, "FuckingNode");
+//   TurtleBot3 robot;
 
+//   // robot.move_forward_meters(1.0);
+//   // robot.move_backwards_meters(1.0);
+//   robot.turn_degree(80.0);
+  
+  
+//   return 0;
+// }
 
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "FuckingNode");
   TurtleBot3 robot;
+  ros::Rate rate(10);
 
-  int rewards[] = {0, 0, 0, 0, 0};
-  int action_count[] = {0, 0, 0, 0, 0};
+  double rewards[] = {0.0, 0.0, 0.0, 0.0, 0.0};
+  long int action_count[] = {0, 0, 0, 0, 0};
   float epsilon = 0.05;
 
   // float previous_distance = robot.get_laser(0);
@@ -362,11 +451,12 @@ int main(int argc, char **argv)
 
   while(1){
     float rand = randUniform(0.0, 1.0);
-    int action = -1;
+    int action;
 
     if(rand < epsilon) {
       // select a random acttion :
       action = randInt(0, 4);
+      cout << "Random!" << endl;
     }
     else {
       float *action_values_ptr = calculate_action_values(rewards, action_count);
@@ -380,6 +470,7 @@ int main(int argc, char **argv)
         }
       }
       // select optimal action :
+      cout << max_action_values << endl;
       action = argmax_action_values;
     }
 
@@ -391,63 +482,56 @@ int main(int argc, char **argv)
     }
     else if (action == 1) {
       // move forward :
-      robot.move_forward(1);
+      robot.move_forward_meters(0.5);
     }
     else if (action == 2) {
       // move backward :
-      robot.move_backwards(1);
+      robot.move_backward_meters(0.5);
     }
     else if (action == 3) {
       // turn right :
-      robot.turn("clockwise", 1);
+      robot.turn_degree(90.0);
     }
     else if (action == 4) {
       // turn left :
-      robot.turn("counterclockwise", 1);
+      robot.turn_degree(-90.0);
     }
     else {
-      ROS_INFO_STREAM("Unrecognized Action ");
+      // ROS_INFO_STREAM("Unrecognized Action ");
       break;
     }
 
-  float * collision = robot.get_laser_full();
-  int maxDegrees = 720;
-  float nearest_obstacle_distance = 1000.0;
-  for(int i=0; i<maxDegrees; i++) {
+  float *collision = robot.get_laser_full();
+  int maxDegrees = 360;
+  double nearest_obstacle_distance = 100000.0;
+  for(int i=0; i<maxDegrees; i+=5) {
     if(*(collision + i) < nearest_obstacle_distance) {
       nearest_obstacle_distance = *(collision + i);
     }
   }
-  // int reward = calculate_rewards(previous_distance, current_distance);
   
   float current_position[2];
   current_position[0] = robot.get_position(1);
   current_position[1] = robot.get_position(2);
 
-  float goal_position[2] = {-1.0, 1.0};
-  
+  float goal_position[] = {-2.0, 1.0};
+
   int reward = calculate_rewards(current_position, previous_position, goal_position, nearest_obstacle_distance, action);
   rewards[action] = rewards[action] + reward;
+  action_count[action] = action_count[action] + 1;
+  
 
-  cout << reward << endl;
+  // for(int i=0; i<maxDegrees; i+=1) {
+  //   cout << "i = " << i << ", collision = " << *(collision + i) << endl;
+  // }
+
+  // cout << reward << endl;
+  // delete[] action_values_ptr;
+
+  // rate.sleep();
+
 
 
   }
-
   return 0;
 }
-
-
-// int main(int argc, char **argv)
-// {
-//   ros::init(argc, argv, "FuckingNode");
-//     TurtleBot3 robot;
-//     // TurtleBot3();
-
-//     std::cout << "Fuck!";
-
-//     robot.move_forward(2);
-
-//     return 0;
-// }
-
