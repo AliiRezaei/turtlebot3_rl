@@ -28,10 +28,19 @@ private:
   // odometry data :
   ros::Subscriber odom_sub;
   std::string odom_topic;
-  float x_pos; // position along x axis
-  float y_pos; // position along y axis
-  float z_pos; // position along z axis
-  float z_ori; // orientation along z axis
+  float x_pos;  // position along x axis
+  float y_pos;  // position along y axis
+  float z_pos;  // position along z axis
+  
+  float x_quat; // turtlebot3 quaternion q.x
+  float y_quat; // turtlebot3 quaternion q.y
+  float z_quat; // turtlebot3 quaternion q.z
+  float w_quat; // turtlebot3 quaternion q.y
+
+  float roll;
+  float pitch;
+  float yaw;
+  
 
   // private methods :
   // laser data subscriber callback :
@@ -49,12 +58,15 @@ public:
   // move forward for 2 seconds :
   void move();
 
+  void Quaternion2RollPitchYaw();
+
   // move forward for n_secs seconds :
   void move_forward(int n_secs);
   void move_forward_meters(float meters);
-  void move_backwards(int n_secs);
+  void move_backward(int n_secs);
+  void move_backward_meters(float meters);
   void turn(string clock, int n_secs);
-  void turn_degree(int deg);
+  void turn_degree(float deg);
   void stop_moving();
   float get_position(int param);
   std::list<float> get_position_full();
