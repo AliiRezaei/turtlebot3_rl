@@ -302,12 +302,52 @@ float *TurtleBot3::get_laser_full() {
 
 
 
+template <typename InputType, size_t N>
+size_t array_length(InputType (&arr)[N]) {
+    return N;
+}
+
+class maxFind {
+public:
+    float maxVal;
+    int   maxIdx;
+    template <typename InputType> void maxFunc(InputType arr[], size_t len);
+};
+
+template <typename InputType> void maxFind::maxFunc(InputType arr[], size_t len) {
+    double max_value = -100000.0;
+    int    max_index = 0;  
+    for(size_t i = 0; i < len; i++){
+      if(arr[i] > max_value){
+        max_value = arr[i];
+        max_index = i;
+      }
+    }
+    this->maxVal = max_value;
+    this->maxIdx = max_index;
+}
+
+class minFind {
+public:
+    float minVal;
+    int   minIdx;
+    template <typename InputType> void minFunc(InputType arr[], size_t len);
+};
+
+template <typename InputType> void minFind::minFunc(InputType arr[], size_t len) {
+    double min_value = 100000.0;
+    int    min_index = 0;  
+    for(size_t i = 0; i < len; i++){
+      if(arr[i] < min_value){
+        min_value = arr[i];
+        min_index = i;
+      }
+    }
+    this->minVal = min_value;
+    this->minIdx = min_index;
+}
 
 
-
-// template <typename InputType, size_t N> size_t array_length(InputType (&arr)[N]) {
-//     return N;
-// }
 
 
 
@@ -435,19 +475,6 @@ float randInt(int low, int up){
 
 
 
-// int main(int argc, char **argv)
-// {
-//   ros::init(argc, argv, "FuckingNode");
-//   TurtleBot3 robot;
-
-//   // robot.move_forward_meters(1.0);
-//   // robot.move_backwards_meters(1.0);
-//   robot.turn_degree(80.0);
-  
-  
-//   return 0;
-// }
-
 
 int main(int argc, char **argv)
 {
@@ -479,23 +506,15 @@ int main(int argc, char **argv)
     else {
       randomStatus = 0;
       float *action_values_ptr = calculate_action_values(rewards, action_count);
-      // calculate argmax action_values :
-      double max_action_values    = - 100000.0;
-      int   argmax_action_values =       0;
+      float action_values_arr[5];
+      
       for(int i=0; i<5; i++){
-
-
-        *(action_values_ptr + i) = *(action_values_ptr + i) + rewards[i];
-
-
-        if(*(action_values_ptr+i) > max_action_values){
-          max_action_values = *(action_values_ptr+i);
-          argmax_action_values = i;
-        }
+        action_values_arr[i] = *(action_values_ptr+i);
       }
       // select optimal action :
-      // cout << max_action_values << endl;
-      action = argmax_action_values;
+      maxFind maxInfo;
+      maxInfo.maxFunc(action_values_arr, 5);
+      action = maxInfo.maxIdx;
     }
 
     
@@ -528,14 +547,18 @@ int main(int argc, char **argv)
       break;
       }
 
-    float *collision = robot.get_laser_full();
     int maxDegrees = 360;
+    float *collision_ptr = robot.get_laser_full();
+    float collision_arr[maxDegrees];
+    
     double nearest_obstacle_distance = 100000.0;
-    for(int i=0; i<maxDegrees; i+=5) {
-      if(*(collision + i) < nearest_obstacle_distance) {
-        nearest_obstacle_distance = *(collision + i);
-      }
+    for(int i=0; i<maxDegrees; i++) {
+      collision_arr[i] = *(collision_ptr + i);
     }
+
+    minFind minInfo;
+    minInfo.minFunc(collision_arr, array_length(collision_arr));
+    float nearest_obstacle_distance = minInfo.minVal;
 
     float current_position[2];
     current_position[0] = robot.get_position(1);
