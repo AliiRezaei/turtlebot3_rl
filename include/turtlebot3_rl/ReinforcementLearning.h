@@ -86,12 +86,12 @@ int QLearning::epsilon_greedy(double reward[], int *actions_set, double actions_
   int action = -1;
 
   // exploitation and exploration : 
-  if(rand > epsilon) {
+  if(rand < epsilon) {
     float *action_values = get_action_values(reward, actions_count);
     action = get_best_action(action_values, actions_set);
   }
   else {
-    action = get_random_action(this->Actions);
+    action = get_random_action(Actions);
   }
    return action; 
 }
