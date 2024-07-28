@@ -141,6 +141,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/TurtleMove.cpp
+  # src/Tollbox.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
@@ -167,7 +168,8 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 add_executable(myTestCode src/myTestCode.cpp)
 target_link_libraries(myTestCode ${catkin_LIBRARIES})
 
-
+add_executable(test_classes src/test_classes.cpp)
+target_link_libraries(test_classes ${catkin_LIBRARIES})
 
 # add_executable(TurtleMoveTest src/TurtleMove.cpp)
 # target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
