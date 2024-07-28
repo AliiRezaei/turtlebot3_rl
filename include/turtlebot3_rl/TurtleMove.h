@@ -171,7 +171,7 @@ void TurtleBot3::move() {
   ros::Duration timeout(2.0); // Timeout of 2 seconds
   while (ros::Time::now() - start_time < timeout) {
     ros::spinOnce();
-    vel_msg.linear.x = +0.5;
+    vel_msg.linear.x  = 0.2;
     vel_msg.angular.z = 0.0;
     vel_pub.publish(vel_msg);
     rate.sleep();
