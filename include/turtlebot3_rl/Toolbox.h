@@ -5,6 +5,7 @@
 #include <math.h>
 #include <iostream>
 #include <random>
+#include <vector>
 
 template <typename InputType, std::size_t N>
 std::size_t array_length(InputType (&arr)[N]) {
@@ -111,5 +112,45 @@ float eucliden_distance(float P1[], float P2[]) {
   return sqrt(norm);
 }
 // end two array eucliden distance calculator
+
+// begin ismember :
+template <typename InputType> int ismember(InputType *arr, InputType *matrix[], std::size_t row, std::size_t col) {
+    
+    for (std::size_t i = 0; i < row; ++i) {
+        bool row_match = true;
+        for (std::size_t j = 0; j < col; ++j) {
+            if (matrix[i][j] != arr[j]) {
+                row_match = false;
+                break;
+            }
+        }
+        if (row_match) {
+            return i; // return the index of the matching row
+        }
+    }
+    return -1; // return -1 if no match is found
+}
+// end ismember
+
+// begin repmat :
+template<typename InputType>
+std::vector<std::vector<InputType>> repmat(InputType *matrix[], std::size_t row, std::size_t col, int n, int m) {
+    std::size_t result_row = row * n;
+    std::size_t result_col = col * m;
+    
+    // initialize the result matrix
+    std::vector<std::vector<InputType>> result(result_row, std::vector<InputType>(result_col));
+    
+    for (std::size_t i = 0; i < result_row; ++i) {
+        for (std::size_t j = 0; j < result_col; ++j) {
+            // compute the source element in the original matrix
+            std::size_t orig_i = i % row;
+            std::size_t orig_j = j % col;
+            result[i][j] = matrix[orig_i][orig_j];
+        }
+    }
+    return result;
+}
+// end repmat
 
 #endif
