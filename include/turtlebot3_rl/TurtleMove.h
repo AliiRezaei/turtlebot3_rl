@@ -124,7 +124,7 @@ TurtleBot3::TurtleBot3() {
   ros::spinOnce();
 }
 
-void TurtleBot3::laser_callback( const sensor_msgs::LaserScan::ConstPtr &laser_msg) {
+void TurtleBot3::laser_callback(const sensor_msgs::LaserScan::ConstPtr &laser_msg) {
   laser_range = laser_msg->ranges;
   // ROS_INFO("Laser value: %f", laser_range);
 }
@@ -212,39 +212,50 @@ void TurtleBot3::move_forward(int time) {
   vel_pub.publish(vel_msg);
 } // end of move_forward
 
-void TurtleBot3::move_forward_meters(float meters) 
-{
-  // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
+// void TurtleBot3::move_forward_meters(float meters) 
+// {
+//   // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
 
-  // rate of publishing :
-  ros::Rate rate(10);
-  ros::Time start_time = ros::Time::now();
+//   // rate of publishing :
+//   ros::Rate rate(10);
+//   ros::Time start_time = ros::Time::now();
 
-  // target position and stop criteria :
-  float x_target = x_pos + meters;
-  double eps = 0.0001;
+//   // target position and stop criteria :
+//   float x_target = x_pos + meters;
+//   double eps = 0.0001;
 
-  // go forward until reaching target position :
-  while (x_target - x_pos > eps) {
-    // ROS_INFO_STREAM("Moving forward " << meters << " meters");
-    ros::spinOnce();
-    vel_msg.linear.x = 0.2;
-    // vel_msg.linear.x = 0.3 * (x_target - x_pos);
-    vel_msg.linear.y = 0.0;
-    vel_msg.angular.z = 0.0;
-    vel_pub.publish(vel_msg);
-    rate.sleep();
-  }
+//   // go forward until reaching target position :
+//   while (x_target - x_pos > eps) {
+//     // ROS_INFO_STREAM("Moving forward " << meters << " meters");
+//     ros::spinOnce();
+//     vel_msg.linear.x = 0.2;
+//     // vel_msg.linear.x = 0.3 * (x_target - x_pos);
+//     vel_msg.linear.y = 0.0;
+//     vel_msg.angular.z = 0.0;
+//     vel_pub.publish(vel_msg);
+//     rate.sleep();
+//   }
 
-  // stop moving :
-  vel_msg.linear.x = 0.0;
+//   // stop moving :
+//   vel_msg.linear.x = 0.0;
+//   vel_msg.angular.z = 0.0;
+//   vel_pub.publish(vel_msg);
+  
+//   // print robot moving status :
+//   ros::Time end_time = ros::Time::now();
+//   // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
+// }
+
+
+void TurtleBot3::move_forward_meters(float meters) {
+  vel_msg.linear.x  = 0.08;
+  vel_msg.linear.y  = 0.0;
   vel_msg.angular.z = 0.0;
   vel_pub.publish(vel_msg);
-  
-  // print robot moving status :
-  ros::Time end_time = ros::Time::now();
-  // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
 }
+
+
+
 
 void TurtleBot3::move_backward(int time) {
   // Rate of publishing
@@ -266,39 +277,47 @@ void TurtleBot3::move_backward(int time) {
   vel_pub.publish(vel_msg);
 }
 
-void TurtleBot3::move_backward_meters(float meters) 
-{
-  // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
+// void TurtleBot3::move_backward_meters(float meters) 
+// {
+//   // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
 
-  // rate of publishing :
-  ros::Rate rate(10);
-  ros::Time start_time = ros::Time::now();
+//   // rate of publishing :
+//   ros::Rate rate(10);
+//   ros::Time start_time = ros::Time::now();
 
-  // target position and stop criteria :
-  float x_target = x_pos - meters;
-  double eps = 0.0001;
+//   // target position and stop criteria :
+//   float x_target = x_pos - meters;
+//   double eps = 0.0001;
 
-  // go forward until reaching target position :
-  while (x_pos - x_target > eps) {
-    // ROS_INFO_STREAM("Moving forward " << meters << " meters");
-    ros::spinOnce();
-    vel_msg.linear.x = -0.2;
-    // vel_msg.linear.x = -0.3 * (x_pos - x_target);
-    vel_msg.linear.y = 0.0;
-    vel_msg.angular.z = 0.0;
-    vel_pub.publish(vel_msg);
-    rate.sleep();
-  }
+//   // go forward until reaching target position :
+//   while (x_pos - x_target > eps) {
+//     // ROS_INFO_STREAM("Moving forward " << meters << " meters");
+//     ros::spinOnce();
+//     vel_msg.linear.x = -0.2;
+//     // vel_msg.linear.x = -0.3 * (x_pos - x_target);
+//     vel_msg.linear.y = 0.0;
+//     vel_msg.angular.z = 0.0;
+//     vel_pub.publish(vel_msg);
+//     rate.sleep();
+//   }
 
-  // stop moving :
-  vel_msg.linear.x = 0.0;
-  vel_msg.angular.z = 0.0;
-  vel_pub.publish(vel_msg);
+//   // stop moving :
+//   vel_msg.linear.x = 0.0;
+//   vel_msg.angular.z = 0.0;
+//   vel_pub.publish(vel_msg);
   
-  // print robot moving status :
-  ros::Time end_time = ros::Time::now();
-  // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
+//   // print robot moving status :
+//   ros::Time end_time = ros::Time::now();
+//   // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
+// }
+
+void TurtleBot3::move_backward_meters(float meters) {
+  vel_msg.linear.x  = - 0.08;
+  vel_msg.linear.y  =   0.0;
+  vel_msg.angular.z =   0.0;
+  vel_pub.publish(vel_msg);
 }
+
 
 void TurtleBot3::turn(string clock, int n_secs) {
   ros::Rate rate(10);
@@ -326,33 +345,46 @@ void TurtleBot3::turn(string clock, int n_secs) {
   vel_pub.publish(vel_msg);
 }
 
+// void TurtleBot3::turn_degree(float deg)
+// {
+//   // Rate of publishing
+//   ros::Rate rate(10);
+
+//   double theta_target = deg * 3.14159265 / 180.0 + yaw;
+
+//   int sign_theta = 0;
+//   if(deg > 0.0) {sign_theta =  1;}
+//   if(deg < 0.0) {sign_theta = -1;}
+
+//   double eps = 0.0001;
+//   while(sign_theta * (theta_target - yaw) > eps)
+//   {
+//     ros::spinOnce();
+//     vel_msg.linear.x = 0.0;
+//     vel_msg.linear.y = 0.0;
+//     vel_msg.angular.z = sign_theta * 0.3;
+//     vel_pub.publish(vel_msg);
+//     // ROS_INFO_STREAM("Turning " << deg << " degrees");
+//     rate.sleep(); 
+//   }
+//   vel_msg.linear.x = 0.0;
+//   vel_msg.linear.y = 0.0;
+//   vel_msg.angular.z = 0.0;
+//   vel_pub.publish(vel_msg);
+// }
+
+
 void TurtleBot3::turn_degree(float deg)
 {
-  // Rate of publishing
-  ros::Rate rate(10);
-
-  double theta_target = deg * 3.14159265 / 180.0 + yaw;
-
   int sign_theta = 0;
   if(deg > 0.0) {sign_theta =  1;}
   if(deg < 0.0) {sign_theta = -1;}
-
-  double eps = 0.0001;
-  while(sign_theta * (theta_target - yaw) > eps)
-  {
-    ros::spinOnce();
-    vel_msg.linear.x = 0.0;
-    vel_msg.linear.y = 0.0;
-    vel_msg.angular.z = sign_theta * 0.3;
-    vel_pub.publish(vel_msg);
-    // ROS_INFO_STREAM("Turning " << deg << " degrees");
-    rate.sleep(); 
-  }
-  vel_msg.linear.x = 0.0;
-  vel_msg.linear.y = 0.0;
-  vel_msg.angular.z = 0.0;
+  vel_msg.linear.x  = 0.06;
+  vel_msg.linear.y  = 0.0;
+  vel_msg.angular.z = sign_theta * 0.04;
   vel_pub.publish(vel_msg);
 }
+
 
 void TurtleBot3::stop_moving() {
   // ROS_INFO_STREAM("Stopping the robot ........... ");
