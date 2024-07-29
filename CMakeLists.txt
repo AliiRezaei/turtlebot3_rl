@@ -171,6 +171,9 @@ target_link_libraries(myTestCode ${catkin_LIBRARIES})
 add_executable(main src/main.cpp)
 target_link_libraries(main ${catkin_LIBRARIES})
 
+add_executable(toolbox_test src/toolbox_test.cpp)
+target_link_libraries(toolbox_test ${catkin_LIBRARIES})
+
 # add_executable(TurtleMoveTest src/TurtleMove.cpp)
 # target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
 
