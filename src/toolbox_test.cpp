@@ -1,31 +1,37 @@
 #include "turtlebot3_rl/Toolbox.h"
+#include "turtlebot3_rl/ReinforcementLearning.h"
 #include <iostream>
+#include <vector>
 
 int main() {
-    std::size_t row = 4;
-    std::size_t col = 2;
-    float matrix[row][col] = {
-        {10.0, 11.0},
-        {20.0, 21.0},
-        {30.0, 31.0},
-        {40.0, 41.0}
-    };
+    int   n_actions = 5;
+    float epsilon   = 0.05;
 
-    // Create an array of pointers to each row of the matrix
-    float *matrix_ptr[row];
-    for (std::size_t i = 0; i < row; ++i) {
-        matrix_ptr[i] = matrix[i];
+    // rl object :
+    QLearning rl(n_actions, epsilon);
+
+    // state space info :
+    struct stateInfo x;
+    x.min = -1.0;
+    x.max = +1.0;
+    x.n   =  10;
+    
+    struct stateInfo y;
+    y.min = -1.0;
+    y.max = +1.0;
+    y.n   =  10;
+    
+    struct stateInfo theta;
+    theta.min = -1.0;
+    theta.max = +1.0;
+    theta.n   =  10;
+
+    // create states space :
+    std::vector<std::vector<float>> all_states = rl.create_states(x, y, theta);
+    for(std::size_t i=0; i<x.n*y.n*theta.n; i++) {
+        std::cout << all_states[i][0] << "\t" << all_states[i][1] << "\t" << all_states[i][2] << "\t" << std::endl;
     }
 
-    float arr[col] = {10.0, 11.0};
-
-    int result = ismember<float>(arr, matrix_ptr, row, col);
-
-    if (result != -1) {
-        std::cout << "Array is a member of the matrix at row index: " << result << std::endl;
-    } else {
-        std::cout << "Array is not a member of the matrix" << std::endl;
-    }
 
     return 0;
 }
