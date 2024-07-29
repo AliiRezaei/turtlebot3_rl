@@ -20,7 +20,8 @@ class QLearning {
   public:
 
 
-    int   *Actions = new int[n_actions];
+    // int   *Actions = new int[n_actions];
+    int   *Actions = new int[5];
     
     QLearning(int n_actions, float epsilon);
     int    get_random_action(int *actions_set);
@@ -68,13 +69,14 @@ int QLearning::get_random_action(int *actions_set) {
 
 int QLearning::get_best_action(float *action_values, int *actions_set) {
   
-  minInfo.minFunc(action_values, n_actions);
-  int min_actions_value =  minInfo.minVal;
-  int min_actions_index =  minInfo.minIdx;
+  maxInfo.maxFunc(action_values, n_actions);
+  int max_action_value =  maxInfo.maxVal;
+  int max_action_index =  maxInfo.maxIdx;
   
-  int best_action = *(actions_set + min_actions_index);
+  int best_action = *(actions_set + max_action_index);
 
   return best_action;
+  // return max_action_index;
 }
 
 int QLearning::epsilon_greedy(double reward[], int *actions_set, double actions_count[]) {
@@ -86,39 +88,37 @@ int QLearning::epsilon_greedy(double reward[], int *actions_set, double actions_
   int action = -1;
 
   // exploitation and exploration : 
-  if(rand < epsilon) {
+  if(rand > epsilon) {
     float *action_values = get_action_values(reward, actions_count);
     action = get_best_action(action_values, actions_set);
   }
   else {
-    action = get_random_action(Actions);
+    action = get_random_action(this->Actions);
   }
    return action; 
 }
 
-float QLearning::get_rewards(float current_position[], float previous_position[], float goal_position[], int action){
+float QLearning::get_rewards(float current_position[], float previous_position[], float goal_position[], int action) {
+  
   float reward = 0.0;
-  if(eucliden_distance(current_position, goal_position) <= 0.05 && action == 0) {
+  float previous_distance = eucliden_distance(previous_position, goal_position);
+  float current_distance  = eucliden_distance(current_position, goal_position);
+
+  if(action == 0 && current_distance > 0.05) {
+    reward -= 10.0;
+  }
+  if(current_distance <= 0.05 && action == 0) {
     reward += 50.0;
   }
-  else if(eucliden_distance(current_position, goal_position) <= 0.1 ) {
-    reward += 10.0;
+  if(current_distance < previous_distance) {
+    reward += 1.0 * current_distance;
+    // reward += 1.0;
   }
   else {
-    float previous_distance = eucliden_distance(previous_position, goal_position);
-    float current_distance  = eucliden_distance(current_position, goal_position);
-    if(current_distance < previous_distance) {
-      // reward += 5.0;
-      reward += 0.5 * current_distance;
-    }
-    else {
-      // reward -= 5.0;
-      reward -= 5.0 * current_distance;
-    }
-
-    if((action == 3)||(action == 4)) {
-      reward -= 5.0;
-    }
+    reward -= 2.0 * current_distance;
+  }
+  if(action == 3 || action == 4) {
+    reward -= 1.0;
   }
   return reward;
 }
@@ -133,9 +133,9 @@ float *QLearning::get_action_values(double reward[], double actions_count[]){
     }
     else {
       action_values[i] = reward[i] / actions_count[i];
+      // action_values[i] = reward[i];
     }
   }
-  cout << endl;
   return action_values;
 }
 
