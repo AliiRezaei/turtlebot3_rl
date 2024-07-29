@@ -78,6 +78,8 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "bit": "cpp"
-    }
+        "bit": "cpp",
+        "adolcforward": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
