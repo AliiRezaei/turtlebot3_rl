@@ -12,7 +12,7 @@ int main() {
     QLearning rl(n_actions, epsilon);
 
     // create actions :
-    std::vector<int> actions = rl.create_actions(n_actions);
+    int *actions = rl.create_actions(n_actions);
 
     // state space info :
     struct stateInfo x;
@@ -49,52 +49,18 @@ int main() {
     // int state_idx = ismember<float>(state, all_states, n_all_states, n_columns);
     // std::cout << state_idx << std::endl;
 
+    // pairing states and actions :
+    float **state_action_pairs = rl.create_state_action_pairs(all_states, actions);
+    std::size_t n_state_action_pairs   = n_all_states * n_actions;
+    std::size_t n_columns_action_pairs = n_columns + 1;
 
-
-
-
-    // // temp test :
-    // float all_states_temp[n_all_states][n_columns];
-    // for(std::size_t i=0; i<n_all_states; i++) {
-    //     for(std::size_t j=0; j<n_columns; j++) {
-    //         all_states_temp[i][j] = all_states[i][j];
-    //     }
+    // // test created pairing atates and actions :
+    // for(std::size_t i = 0; i < n_state_action_pairs; i++) {
+    //   for(std::size_t j = 0; j < n_columns_action_pairs; j++) {
+    //     std::cout << *(*(state_action_pairs + i) + j) << "\t";
+    //   }
+    // std::cout << std::endl;
     // }
-
-    // float *all_states_ptr[n_all_states];
-    // for(std::size_t i=0; i<n_all_states; i++) {
-    //     all_states_ptr[i] = all_states_temp[i];
-    //     // std::cout << all_states_ptr[i] << std::endl;
-    // }
-    // // for(std::size_t i=0; i<x.n*y.n*theta.n; i++) {
-    // //     std::cout << all_states[i][0] << "\t" << all_states[i][1] << "\t" << all_states[i][2] << "\t" << std::endl;
-    // // }
-
-
-
-
-    // // pairing atates and actions :
-    // std::vector<std::vector<float>> state_action_pairs = rl.create_state_action_pairs(all_states, actions);
-    // std::size_t n_state_action_pairs   = n_all_states * theta.n;
-    // std::size_t n_columns_action_pairs = n_columns + 1;
-    
-    // float state_action_pairs_temp[n_state_action_pairs][n_columns_action_pairs];
-    // for(std::size_t i=0; i<n_state_action_pairs; i++) {
-    //     for(std::size_t j=0; j<n_columns_action_pairs; j++) {
-    //         state_action_pairs_temp[i][j] = state_action_pairs[i][j];
-    //         // std::cout << state_action_pairs_temp[i][j] << std::endl;
-    //     }
-    // }
-
-    // float *state_action_pairs_ptr[n_state_action_pairs];
-    // for(std::size_t i=0; i<n_state_action_pairs; i++) {
-    //     state_action_pairs_ptr[i] = state_action_pairs_temp[i];
-    //     // std::cout << state_action_pairs_ptr[i] << std::endl;
-    // }
-    // // for(std::size_t i=0; i<x.n*y.n*theta.n*n_actions; i++) {
-    // //     std::cout << state_action_pairs[i][0] << "\t" << state_action_pairs[i][1] << "\t" << state_action_pairs[i][2] << "\t" << state_action_pairs[i][3] << "\t" << std::endl;
-    // // }
-
 
     // // learning params :
     // int   n_episodes = 1;
