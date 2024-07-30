@@ -7,6 +7,8 @@
 #include <random>
 #include <vector>
 
+#define _PI_NUMBER_ 3.14159265
+
 template <typename InputType, std::size_t N>
 std::size_t array_length(InputType (&arr)[N]) {
     return N;
@@ -104,16 +106,15 @@ float eucliden_distance(float P1[], float P2[]) {
 
 // begin ismember :
 template <typename InputType> int ismember(InputType *arr, InputType *matrix[], std::size_t row, std::size_t col) {
-    
-    for (std::size_t i = 0; i < row; ++i) {
+    for(std::size_t i = 0; i < row; ++i) {
         bool row_match = true;
-        for (std::size_t j = 0; j < col; ++j) {
-            if (matrix[i][j] != arr[j]) {
+        for(std::size_t j = 0; j < col; ++j) {
+            if(matrix[i][j] != arr[j]) {
                 row_match = false;
                 break;
             }
         }
-        if (row_match) {
+        if(row_match) {
             return i; // return the index of the matching row
         }
     }
@@ -169,6 +170,8 @@ template<typename InputType> float *linspace(InputType a, InputType b, int n) {
     for(int i = 0; i < n; i++) {
         sequence[i] = a + i * step_size;
     }
+    *(sequence + 0)     = a;
+    *(sequence + n - 1) = b;
     return sequence;
 }
 // end linspace
