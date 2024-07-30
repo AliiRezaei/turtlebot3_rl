@@ -45,13 +45,16 @@ class QLearning {
     int    *create_actions(int nactions);
     float **create_states(stateInfo x, stateInfo y, stateInfo theta);
     float **create_state_action_pairs(float *all_states[], int *a);
-    int    get_random_action(int *actions_set);
-    int    get_best_action(float *action_values, int *actions_set);
-    int    epsilon_greedy(double reward[], int *actions_set, double actions_count[]);
-    int   *get_random_policy(int num);
-    struct Interaction do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state);
-    struct Interaction get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action);
-    float *get_action_values(double reward[], double actions_count[]);
+    int     get_random_action(int *actions_set);
+    int     get_best_action(float *action_values, int *actions_set);
+    int     epsilon_greedy(double reward[], int *actions_set, double actions_count[]);
+    int    *get_random_policy(int num);
+    void    improve_policy(float *qtable, std::size_t qtable_len, int *last_policy);
+    float  *zeros_init_Qtable(int num);
+    float  *random_init_Qtable(int num, float min_rand, float max_rand);
+    float   do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state);
+    float   get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action);
+    float  *get_action_values(double reward[], double actions_count[]);
     
 };
 
@@ -229,7 +232,37 @@ int *QLearning::get_random_policy(int num) {
   return random_policy;
 }
 
-struct Interaction QLearning::do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state) {
+void QLearning::improve_policy(float *qtable, std::size_t qtable_len, int *last_policy) {
+  maxFind maxInfo;
+  float *qtable_window = new float[n_actions];
+  for(std::size_t i=0; i<qtable_len/n_actions; i++) {
+    std::size_t index = 0;
+    for(std::size_t j=n_actions*i; j<n_actions*(i+1); j++) {
+      *(qtable_window + index++) = *(qtable + j);
+    }
+    maxInfo.maxFunc(qtable_window, n_actions);
+    *(last_policy + i) = maxInfo.maxIdx;
+  }
+  delete[] qtable_window;
+}
+
+float *QLearning::zeros_init_Qtable(int num) {
+  float *q = new float[num];
+  for(int i=0; i<num; i++) {
+    *(q + i) = 0.0;
+  }
+  return q;
+}
+
+float *QLearning::random_init_Qtable(int num, float min_rand, float max_rand) {
+  float *q = new float[num];
+  for(int i=0; i<num; i++) {
+    *(q + i) = randGenerator.randUniform(min_rand, max_rand);
+  }
+  return q;
+}
+
+float QLearning::do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state) {
   
   float x = *(state + 0);
   float y = *(state + 1);
@@ -238,14 +271,6 @@ struct Interaction QLearning::do_action(float *all_states[], float *state, float
   float x_new;
   float y_new;
   float theta_new;
-
-  float r = sqrt(x_space_precise * x_space_precise + y_space_precise * y_space_precise);
-
-  // // extract all possible thetas :
-  // float *_theta_ = linspace<float>(theta_lower, theta_upper, theta_space_size);
-  // for(int i=0; i<theta_space_size; i++) {
-  //   std::cout << *(_theta_ + i) << std::endl;
-  // }
   
   switch (action)
   {
@@ -258,15 +283,65 @@ struct Interaction QLearning::do_action(float *all_states[], float *state, float
   
   case 1:
     // move forward in theta direcction :
-    x_new = x + r * cos(theta);
-    y_new = y + r * sin(theta);
+    // if(theta < _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_-_PI_NUMBER_ / 4.0) {
+    //   // theta is zero
+    //   x_new = x + x_space_precise;
+    //   y_new = y;
+    // }
+    // else if(theta < 3.0 * _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_ / 4.0) {
+    //   // theta is pi / 2
+    //   x_new = x;
+    //   y_new = y + y_space_precise;
+    // }
+    // else if(theta < 5.0 * _PI_NUMBER_ / 4.0 && theta > 3.0 * _PI_NUMBER_ / 4.0) {
+    //   // theta is pi
+    //   x_new = x - x_space_precise;
+    //   y_new = y;
+    // }
+    // else if(theta < 7.0 * _PI_NUMBER_ / 4.0 && theta > 5.0 * _PI_NUMBER_ / 4.0) {
+    //   // theta is 3 * pi / 2
+    //   x_new = x;
+    //   y_new = y - y_space_precise;
+    // }
+    // else {
+    //   // theta is 2 * pi
+    //   x_new = x + x_space_precise;
+    //   y_new = y;
+    // }
+    x_new = x + x_space_precise * round(cos(theta));
+    y_new = y + y_space_precise * round(sin(theta));
     theta_new = theta;
     break;
   
   case 2:
     // move backward in theta direcction :
-    x_new = x - r * cos(theta);
-    y_new = y - r * sin(theta);
+    // if(theta < _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_-_PI_NUMBER_ / 4.0) {
+    //   // theta is zero
+    //   x_new = x - x_space_precise;
+    //   y_new = y;
+    // }
+    // else if(theta < 3.0 * _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_ / 4.0) {
+    //   // theta is pi / 2
+    //   x_new = x;
+    //   y_new = y - y_space_precise;
+    // }
+    // else if(theta < 5.0 * _PI_NUMBER_ / 4.0 && theta > 3.0 * _PI_NUMBER_ / 4.0) {
+    //   // theta is pi
+    //   x_new = x + x_space_precise;
+    //   y_new = y;
+    // }
+    // else if(theta < 7.0 * _PI_NUMBER_ / 4.0 && theta > 5.0 * _PI_NUMBER_ / 4.0) {
+    //   // theta is 3 * pi / 2
+    //   x_new = x;
+    //   y_new = y + y_space_precise;
+    // }
+    // else {
+    //   // theta is 2 * pi
+    //   x_new = x - x_space_precise;
+    //   y_new = y;
+    // }
+    x_new = x - x_space_precise * round(cos(theta));
+    y_new = y - y_space_precise * round(sin(theta));
     theta_new = theta;
     break;
 
@@ -285,55 +360,33 @@ struct Interaction QLearning::do_action(float *all_states[], float *state, float
     break;
 
   default:
-    x_new = 0.0;
-    y_new = 0.0;
-    theta_new = 0.0;
+    // x_new = 0.0;
+    // y_new = 0.0;
+    // theta_new = 0.0;
     break;
   }
 
-  // // float reward = 0.0;
-
-  // if(x_new > x_upper) {
-  //   x_new = x_upper;
-  //   // reward -= 10.0;
-  // }
-
-  // if(x_new < x_lower) {
-  //   x_new = x_lower;
-  //   // reward -= 10.0;
-  // }
-
-  // if(y_new > y_upper) {
-  //   y_new = y_upper;
-  //   // reward -= 10.0;
-  // }
-
-  // if(y_new < y_lower) {
-  //   y_new = y_lower;
-  //   // reward -= 10.0;
-  // }
+  float reward = 0.0;
 
   *(state_new + 0) = x_new;
   *(state_new + 1) = y_new;
   *(state_new + 2) = theta_new;
 
-  struct Interaction interact = get_reward(all_states, state_new, state, goal_state, action);
+  reward += get_reward(all_states, state_new, state, goal_state, action);
   // interact.state_next = state_new;
   // std::cout << *(state_new + 0) << "\t" << *(state + 0) << std::endl;
   // std::cout << *(state_new + 1) << "\t" << *(state + 1) << std::endl;
   // std::cout << *(state_new + 2) << "\t" << *(state + 2) << std::endl;
 
-  return interact;
+  return reward;
 }
 
-struct Interaction QLearning::get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action) {
-  struct Interaction interact_with_env;
+float QLearning::get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action) {
   // interact_with_env.state_next = previous_state;
   float reward = 0.0;
   int current_state_status = ismember<float>(current_state, all_states, this->states_row_size, this->states_col_size);
-  std::cout << current_state_status << std::endl;
+  // std::cout << current_state_status << std::endl;
   if(current_state_status != -1) {
-    interact_with_env.state_next = current_state;
     if(*(current_state + 0) == *(goal_state + 0) && *(current_state + 1) == *(goal_state + 1)) {
       reward = +10.0;
     }
@@ -342,13 +395,16 @@ struct Interaction QLearning::get_reward(float *all_states[], float *current_sta
     }
   }
   else {
-    interact_with_env.state_next = previous_state;
+    *(current_state + 0) = *(previous_state + 0);
+    *(current_state + 1) = *(previous_state + 1);
+    *(current_state + 2) = *(previous_state + 2);
     reward = -10.0;
   }
-  
-  interact_with_env.reward = reward;
+  // if(action == 0 || action == 3 || action == 4) {
+  //   reward += -5.0;
+  // }
 
-  return interact_with_env;
+  return reward;
 }
 
 float *QLearning::get_action_values(double reward[], double actions_count[]){
