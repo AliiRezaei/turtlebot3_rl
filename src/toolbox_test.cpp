@@ -2,6 +2,8 @@
 #include "turtlebot3_rl/ReinforcementLearning.h"
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <iomanip>
 
 int main() {
 
@@ -120,6 +122,9 @@ int main() {
     // init reward per episode var :
     float rpe = 0.0;
 
+    // create a text file for log learning process :
+    std::ofstream learning_data;
+
     int i = 0;
     // learning loop :
     for(int e=0; e<n_episodes; e++) {
@@ -213,8 +218,15 @@ int main() {
         std::cout << "Episode : " << e << "\t" << "Reward per Episode : " << rpe << std::endl;
         epsilon = epsilon * 0.97;
     }
-    // for(int i=0; i<n_state_action_pairs; i++) {
-    //     std::cout << *(Qtable + i) << std::endl;
-    // }
+    // log q table :
+    learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/learning_data.txt");
+    learning_data << "Gamma     = " << gamma << " , " << "alpha    = " << alpha << " , " << "episodes            = " << n_episodes << std::endl;
+    learning_data << "n actions = " << n_actions << "    , " << "n states = " << n_all_states << " , " << "n state action pair = " << n_state_action_pairs << std::endl;
+    learning_data << std::endl;
+    learning_data << "row" << "\t \t " << "x" << "\t \t"  << "y" << "\t \t"  << "theta" << "\t \t"  << "actions" << "\t \t"  << "best action" << "\t \t" << "Q Table Values" << std::endl;
+    for(int i=0; i<n_state_action_pairs; i++) {
+        learning_data << i << "\t \t" << *(*(state_action_pairs + i) + 0) << "\t \t" << *(*(state_action_pairs + i) + 1) << "\t \t" << std::setprecision(4) << *(*(state_action_pairs + i) + 2) << "\t \t" << *(*(state_action_pairs + i) + 3) << "\t \t" << *(policy + (i % n_actions)) << "\t \t" << std::setprecision(4) << *(Qtable + i) << std::endl;
+    }
+    learning_data.close();
     return 0;
 }
