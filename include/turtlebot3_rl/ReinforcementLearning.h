@@ -49,7 +49,7 @@ class QLearning {
     int    get_best_action(float *action_values, int *actions_set);
     int    epsilon_greedy(double reward[], int *actions_set, double actions_count[]);
     int   *get_random_policy(int num);
-    struct Interaction do_action(float *all_states[], float *state, int action, float *goal_state);
+    struct Interaction do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state);
     struct Interaction get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action);
     float *get_action_values(double reward[], double actions_count[]);
     
@@ -229,7 +229,7 @@ int *QLearning::get_random_policy(int num) {
   return random_policy;
 }
 
-struct Interaction QLearning::do_action(float *all_states[], float *state, int action, float *goal_state) {
+struct Interaction QLearning::do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state) {
   
   float x = *(state + 0);
   float y = *(state + 1);
@@ -241,11 +241,11 @@ struct Interaction QLearning::do_action(float *all_states[], float *state, int a
 
   float r = sqrt(x_space_precise * x_space_precise + y_space_precise * y_space_precise);
 
-  // extract all possible thetas :
-  float *_theta_ = linspace<float>(theta_lower, theta_upper, theta_space_size);
-  for(int i=0; i<theta_space_size; i++) {
-    std::cout << *(_theta_ + i) << std::endl;
-  }
+  // // extract all possible thetas :
+  // float *_theta_ = linspace<float>(theta_lower, theta_upper, theta_space_size);
+  // for(int i=0; i<theta_space_size; i++) {
+  //   std::cout << *(_theta_ + i) << std::endl;
+  // }
   
   switch (action)
   {
@@ -313,7 +313,6 @@ struct Interaction QLearning::do_action(float *all_states[], float *state, int a
   //   // reward -= 10.0;
   // }
 
-  float *state_new = new float[3];
   *(state_new + 0) = x_new;
   *(state_new + 1) = y_new;
   *(state_new + 2) = theta_new;
@@ -332,6 +331,7 @@ struct Interaction QLearning::get_reward(float *all_states[], float *current_sta
   // interact_with_env.state_next = previous_state;
   float reward = 0.0;
   int current_state_status = ismember<float>(current_state, all_states, this->states_row_size, this->states_col_size);
+  std::cout << current_state_status << std::endl;
   if(current_state_status != -1) {
     interact_with_env.state_next = current_state;
     if(*(current_state + 0) == *(goal_state + 0) && *(current_state + 1) == *(goal_state + 1)) {
