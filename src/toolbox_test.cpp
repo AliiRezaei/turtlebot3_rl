@@ -35,18 +35,25 @@ int main() {
     std::size_t n_all_states = x.n * y.n * theta.n;
     std::size_t n_columns = 3;
 
-    // test created states space :
-    for(std::size_t i = 0; i < n_all_states; i++) {
-      for(std::size_t j = 0; j < n_columns; j++) {
-        std::cout << *(*(all_states + i) + j) << "\t";
-      }
-    std::cout << std::endl;
-    }
+    // // test created states space :
+    // for(std::size_t i = 0; i < n_all_states; i++) {
+    //   for(std::size_t j = 0; j < n_columns; j++) {
+    //     std::cout << *(*(all_states + i) + j) << "\t";
+    //   }
+    // std::cout << std::endl;
+    // }
+
+    // // test equavalency of **a == *a[] ok, the result is true
+    // float s[] = {-1.0, -1.0, 0.0};
+    // float *state = s;
+    // int state_idx = ismember<float>(state, all_states, n_all_states, n_columns);
+    // std::cout << state_idx << std::endl;
 
 
 
 
 
+    // // temp test :
     // float all_states_temp[n_all_states][n_columns];
     // for(std::size_t i=0; i<n_all_states; i++) {
     //     for(std::size_t j=0; j<n_columns; j++) {
@@ -62,6 +69,9 @@ int main() {
     // // for(std::size_t i=0; i<x.n*y.n*theta.n; i++) {
     // //     std::cout << all_states[i][0] << "\t" << all_states[i][1] << "\t" << all_states[i][2] << "\t" << std::endl;
     // // }
+
+
+
 
     // // pairing atates and actions :
     // std::vector<std::vector<float>> state_action_pairs = rl.create_state_action_pairs(all_states, actions);
