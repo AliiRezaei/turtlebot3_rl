@@ -122,20 +122,23 @@ template <typename InputType> int ismember(InputType *arr, InputType *matrix[], 
 // end ismember
 
 // begin repmat :
-template<typename InputType>
-std::vector<std::vector<InputType>> repmat(InputType *matrix[], std::size_t row, std::size_t col, int n, int m) {
+template<typename InputType> InputType **repmat(InputType *matrix[], std::size_t row, std::size_t col, int n, int m) {
     std::size_t result_row = row * n;
     std::size_t result_col = col * m;
     
-    // initialize the result matrix :
-    std::vector<std::vector<InputType>> result(result_row, std::vector<InputType>(result_col));
-    
+    // allocate memory for the result matrix :
+    InputType **result = new InputType*[result_row];
+    for (std::size_t i = 0; i < result_row; ++i) {
+        result[i] = new InputType[result_col];
+    }
+
+    // fill the result matrix :
     for (std::size_t i = 0; i < result_row; ++i) {
         for (std::size_t j = 0; j < result_col; ++j) {
             // compute the source element in the original matrix :
             std::size_t orig_i = i % row;
             std::size_t orig_j = j % col;
-            result[i][j] = matrix[orig_i][orig_j];
+            *(*(result + i) + j) = matrix[orig_i][orig_j];
         }
     }
     return result;
@@ -149,6 +152,13 @@ struct stateInfo {
   int   n;
 };
 // end stateInfo
+
+// begin Interaction :
+struct Interaction {
+  float  reward;
+  float *state_next;
+};
+// end Interaction
 
 // begin linspace :
 template<typename InputType> float *linspace(InputType a, InputType b, int n) {
