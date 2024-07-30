@@ -42,9 +42,9 @@ class QLearning {
     
     QLearning(int n_actions, float epsilon);
 
-    std::vector<int> create_actions(int nactions);
+    int    *create_actions(int nactions);
     float **create_states(stateInfo x, stateInfo y, stateInfo theta);
-    std::vector<std::vector<float>> create_state_action_pairs(const std::vector<std::vector<float>>& all_states, const std::vector<int>& all_actions);
+    float **create_state_action_pairs(float *all_states[], int *a);
     int    get_random_action(int *actions_set);
     int    get_best_action(float *action_values, int *actions_set);
     int    epsilon_greedy(double reward[], int *actions_set, double actions_count[]);
@@ -72,13 +72,11 @@ QLearning::QLearning(int n_actions, float epsilon) {
     // create_states();
 }
 
-std::vector<int> QLearning::create_actions(int n_actions) {
-  std::vector<int> result(n_actions, 1);
+int *QLearning::create_actions(int n_actions) {
     for(int i=0; i<n_actions; i++) {
-        result[i] = i;
-        *(actions + i) = i;
+        *(this->actions + i) = i;
     }
-    return result;
+    return this->actions;
 }
 
 float **QLearning::create_states(stateInfo x, stateInfo y, stateInfo theta) {
@@ -147,26 +145,28 @@ float **QLearning::create_states(stateInfo x, stateInfo y, stateInfo theta) {
   return augmented_states;
 }
 
-std::vector<std::vector<float>> QLearning::create_state_action_pairs(const std::vector<std::vector<float>>& all_states, const std::vector<int>& all_actions) {
+float **QLearning::create_state_action_pairs(float *all_states[], int *a) {
     std::size_t states_row_size = x_space_size * y_space_size * theta_space_size;
-    std::size_t col_size = 3;
-    // std::size_t num_actions = all_actions.size();
-    // std::size_t result_row_size = states_row_size * n_actions;
+    std::size_t states_col_size = 3;
     std::size_t result_row_size = states_row_size * n_actions;
-    std::size_t result_col_size = col_size + 1;
+    std::size_t result_col_size = states_col_size + 1;
 
-    std::vector<std::vector<float>> result(result_row_size, std::vector<float>(result_col_size));
+    // allocate memory for the result matrix :
+    float **s_a_pairs = new float*[result_row_size];
+    for (std::size_t i = 0; i < result_row_size; i++) {
+        s_a_pairs[i] = new float[result_col_size];
+    }
 
     for (std::size_t i = 0; i < states_row_size; ++i) {
         for (std::size_t j = 0; j < n_actions; ++j) {
             std::size_t index = i * n_actions + j;
-            for (std::size_t k = 0; k < col_size; ++k) {
-                result[index][k] = all_states[i][k];
+            for (std::size_t k = 0; k < states_col_size; ++k) {
+                *(*(s_a_pairs + index) + k) = all_states[i][k];
             }
-            result[index][col_size] = static_cast<float>(all_actions[j]);
+            *(*(s_a_pairs + index) + states_col_size) = *(a + j);
         }
     }
-    return result;
+    return s_a_pairs;
 }
 
 
