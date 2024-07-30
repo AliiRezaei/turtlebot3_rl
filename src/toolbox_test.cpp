@@ -27,8 +27,8 @@ int main() {
     
     struct stateInfo theta;
     theta.min =  0.0;
-    theta.max = 3.14159265;
-    theta.n   =  2;
+    theta.max =  2.0 * 3.14159265;
+    theta.n   =  4;
 
     // create states space :
     float **all_states = rl.create_states(x, y, theta);
@@ -62,72 +62,86 @@ int main() {
     // std::cout << std::endl;
     // }
 
-    // // learning params :
-    // int   n_episodes = 1;
-    // float gamma      = 0.99;
-    // float alpha      = 0.10;
-    // struct Interaction int_with_env;
+    // learning params :
+    int   n_episodes = 1;
+    float gamma      = 0.99;
+    float alpha      = 0.10;
+    struct Interaction int_with_env;
 
-    // // goal selection :
-    // float  goal_state[] = {1.0, 0.0};
-    // float *goal = goal_state;
+    // goal selection :
+    float  goal_state[] = {1.0, 0.0};
+    float *goal = goal_state;
 
-    // // initialize polices :
-    // int *policy = rl.get_random_policy(n_all_states);
-    // // for(int i=0; i<n_all_states; i++) {
-    // //     std::cout << *(policy + i) << std::endl;
-    // // }
-
-    // // learning loop :
-    // for(int e=0; e<n_episodes; e++) {
-    //     int random_row = rl.randGenerator.randInteger(0, n_all_states - 1);
-    //     float *state = new float[n_columns];
-    //     float *state_next = new float[n_columns];
-    //     for(std::size_t i=0; i<n_columns; i++) {
-    //         *(state + i) = all_states[random_row][i];
-    //     }
-        
-    //     while(e++<n_episodes) {
-    //         int state_idx = ismember<float>(state, all_states_ptr, n_all_states, n_columns);
-    //         float rand = rl.randGenerator.randUniform(0.0, 1.0);
-    //         int action = -1; // None acttion
-    //         if(rand > epsilon) {
-    //             action = *(policy + state_idx);
-    //         }
-    //         else {
-    //             action = rl.get_random_action(rl.actions);
-    //         }
-    //         // float *state_next = rl.do_action(state, action);
-    //         int_with_env = rl.do_action(all_states_ptr, state, action, goal);
-    //         state_next = int_with_env.state_next;
-
-    //         float reward = int_with_env.reward;
-
-    //         // std::cout << *(state_next + 0) << "\t" << *(state + 0) << std::endl;
-    //         // std::cout << *(state_next + 1) << "\t" << *(state + 1) << std::endl;
-    //         // std::cout << *(state_next + 2) << "\t" << *(state + 2) << std::endl;
-    //         // for(std::size_t i=0; i<n_columns; i++) {
-    //         //      std::cout << *(state_next + i) << "\t" << *(state + i) << "\t";
-    //         // }
-    //         // std::cout << reward << std::endl;
-    //         // std::cout << action << std::endl;
-
-
-    //         // float  state_action_check[n_columns_action_pairs];
-    //         // float *state_action_check_ptr = state_action_check;
-    //         // *(state_action_check_ptr + 0) = *(state + 0);
-    //         // *(state_action_check_ptr + 1) = *(state + 1);
-    //         // *(state_action_check_ptr + 2) = *(state + 2);
-    //         // *(state_action_check_ptr + 3) = (float) action;
-
-    //         // int state_action_paired_idx = ismember<float>(state_action_check_ptr, state_action_pairs_ptr, n_state_action_pairs, n_columns_action_pairs);
-    //         // int state_action_paired_next_idx = ismember<float>(state_next, state_action_pairs_ptr, n_state_action_pairs, n_columns);
-    //         // std::cout << state_action_paired_idx << "\t" << state_action_paired_next_idx << std::endl;
-    //     }
-        
-        
-
+    // initialize polices :
+    int *policy = rl.get_random_policy(n_all_states);
+    // for(int i=0; i<n_all_states; i++) {
+    //     std::cout << *(policy + i) << std::endl;
     // }
+
+    
+
+    // init current and next state pointers :
+    float *state = new float[n_columns];
+    float *state_next = new float[n_columns];
+
+    // init state index with None :
+    int state_idx = -1; 
+
+    // init action with None :
+    int action = -1;
+
+    // init a rand var with None :
+    float rand = -1.0;
+
+    // init reward per episode (befor starts learning, reward is zero):
+    float reward = 0.0;
+
+    // learning loop :
+    for(int e=0; e<n_episodes; e++) {
+        int random_row = rl.randGenerator.randInteger(0, n_all_states - 1);
+        
+        for(std::size_t i=0; i<n_columns; i++) {
+            *(state + i) = *(*(all_states + random_row) + i);
+        }
+        
+        while(e++<n_episodes) {
+            // find random selected state in all_states :
+            state_idx = ismember<float>(state, all_states, n_all_states, n_columns);
+            
+            // select an action :
+            rand = rl.randGenerator.randUniform(0.0, 1.0);
+            if(rand > epsilon) {
+                // select an action from optimal policy :
+                action = *(policy + state_idx);
+            }
+            else {
+                // select a random action :
+                action = rl.get_random_action(rl.actions);
+            }
+
+            // doing selected action and get reward and new state :
+            int_with_env = rl.do_action(all_states, state, state_next, action, goal);
+            state_next   = int_with_env.state_next;
+            reward       = int_with_env.reward;
+
+            std::cout << *(state_next + 0) << "\t" << *(state + 0) << std::endl;
+            std::cout << *(state_next + 1) << "\t" << *(state + 1) << std::endl;
+            std::cout << *(state_next + 2) << "\t" << *(state + 2) << std::endl;
+            // for(std::size_t i=0; i<n_columns; i++) {
+            //      std::cout << *(state_next + i) << "\t" << *(state + i) << "\t";
+            // }
+            std::cout << reward << std::endl;
+            std::cout << action << std::endl;
+
+
+            // int state_action_paired_idx = ismember<float>(state_action_check_ptr, state_action_pairs_ptr, n_state_action_pairs, n_columns_action_pairs);
+            // int state_action_paired_next_idx = ismember<float>(state_next, state_action_pairs_ptr, n_state_action_pairs, n_columns);
+            // std::cout << state_action_paired_idx << "\t" << state_action_paired_next_idx << std::endl;
+        }
+        
+        
+
+    }
 
 
 
