@@ -7,7 +7,7 @@
 
 int main() {
 
-    int   n_actions = 5;
+    int   n_actions = 4;
     float epsilon   = 0.9;
 
     // rl object :
@@ -154,7 +154,10 @@ int main() {
             }
 
             // doing selected action and get reward and new state :
-            reward = rl.do_action(all_states, state, state_next, action, goal);
+            rl.do_action(state, state_next, action);
+
+            // calculate reward :
+            reward = rl.get_reward(all_states, state_next, state, goal, action);
 
             // // test do_action correct works or not :
             // std::cout << *(state_next + 0) << "\t" << *(state + 0) << std::endl;
@@ -218,15 +221,20 @@ int main() {
         std::cout << "Episode : " << e << "\t" << "Reward per Episode : " << rpe << std::endl;
         epsilon = epsilon * 0.97;
     }
-    // log q table :
+    // logging info :
     learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/learning_data.txt");
     learning_data << "Gamma     = " << gamma << " , " << "alpha    = " << alpha << " , " << "episodes            = " << n_episodes << std::endl;
     learning_data << "n actions = " << n_actions << "    , " << "n states = " << n_all_states << " , " << "n state action pair = " << n_state_action_pairs << std::endl;
     learning_data << std::endl;
-    learning_data << "row" << "\t \t " << "x" << "\t \t"  << "y" << "\t \t"  << "theta" << "\t \t"  << "actions" << "\t \t"  << "best action" << "\t \t" << "Q Table Values" << std::endl;
+    learning_data << "row" << "\t \t " << "x" << "\t \t"  << " y" << "\t \t"  << "theta" << "\t \t"  << "actions" << "\t \t"  << "best action" << "\t \t" << "Q Table" << std::endl;
+    int index=0; // for log optimal policy
     for(int i=0; i<n_state_action_pairs; i++) {
-        learning_data << i << "\t \t" << *(*(state_action_pairs + i) + 0) << "\t \t" << *(*(state_action_pairs + i) + 1) << "\t \t" << std::setprecision(4) << *(*(state_action_pairs + i) + 2) << "\t \t" << *(*(state_action_pairs + i) + 3) << "\t \t" << *(policy + (i % n_actions)) << "\t \t" << std::setprecision(4) << *(Qtable + i) << std::endl;
+        learning_data << i << "\t \t" << *(*(state_action_pairs + i) + 0) << "\t \t" << *(*(state_action_pairs + i) + 1) << "\t \t" << std::setprecision(4) << *(*(state_action_pairs + i) + 2) << "\t \t" << *(*(state_action_pairs + i) + 3) << "\t \t" << *(policy + index) << "\t \t \t" << std::setprecision(4) << *(Qtable + i) << std::endl;
+        if(((i + 1) % n_actions) == 0) {index++;}
     }
     learning_data.close();
+    for(int i=0; i<n_all_states; i++) {
+        std::cout << *(policy + i) << std::endl;
+    }
     return 0;
 }
