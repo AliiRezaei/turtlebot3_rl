@@ -129,10 +129,7 @@
 
 int main() {
 
-    randomGen randObj;
-    float randNum = randObj.randUniform(0.0, 1.0);
-
-    cout << randNum << endl;
+    
 
     return 0;
 }
