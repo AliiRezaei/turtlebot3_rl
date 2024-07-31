@@ -52,7 +52,7 @@ class QLearning {
     void    improve_policy(float *qtable, std::size_t qtable_len, int *last_policy);
     float  *zeros_init_Qtable(int num);
     float  *random_init_Qtable(int num, float min_rand, float max_rand);
-    float   do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state);
+    void    do_action(float *state, float *state_new, int action);
     float   get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action);
     float  *get_action_values(double reward[], double actions_count[]);
     
@@ -262,7 +262,7 @@ float *QLearning::random_init_Qtable(int num, float min_rand, float max_rand) {
   return q;
 }
 
-float QLearning::do_action(float *all_states[], float *state, float *state_new, int action, float *goal_state) {
+void QLearning::do_action(float *state, float *state_new, int action) {
   
   float x = *(state + 0);
   float y = *(state + 1);
@@ -275,84 +275,27 @@ float QLearning::do_action(float *all_states[], float *state, float *state_new, 
   switch (action)
   {
   case 0:
-    // stop moving :
-    x_new = x;
-    y_new = y;
-    theta_new = theta;
-    break;
-  
-  case 1:
     // move forward in theta direcction :
-    // if(theta < _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_-_PI_NUMBER_ / 4.0) {
-    //   // theta is zero
-    //   x_new = x + x_space_precise;
-    //   y_new = y;
-    // }
-    // else if(theta < 3.0 * _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_ / 4.0) {
-    //   // theta is pi / 2
-    //   x_new = x;
-    //   y_new = y + y_space_precise;
-    // }
-    // else if(theta < 5.0 * _PI_NUMBER_ / 4.0 && theta > 3.0 * _PI_NUMBER_ / 4.0) {
-    //   // theta is pi
-    //   x_new = x - x_space_precise;
-    //   y_new = y;
-    // }
-    // else if(theta < 7.0 * _PI_NUMBER_ / 4.0 && theta > 5.0 * _PI_NUMBER_ / 4.0) {
-    //   // theta is 3 * pi / 2
-    //   x_new = x;
-    //   y_new = y - y_space_precise;
-    // }
-    // else {
-    //   // theta is 2 * pi
-    //   x_new = x + x_space_precise;
-    //   y_new = y;
-    // }
     x_new = x + x_space_precise * round(cos(theta));
     y_new = y + y_space_precise * round(sin(theta));
     theta_new = theta;
     break;
   
-  case 2:
+  case 1:
     // move backward in theta direcction :
-    // if(theta < _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_-_PI_NUMBER_ / 4.0) {
-    //   // theta is zero
-    //   x_new = x - x_space_precise;
-    //   y_new = y;
-    // }
-    // else if(theta < 3.0 * _PI_NUMBER_ / 4.0 && theta > _PI_NUMBER_ / 4.0) {
-    //   // theta is pi / 2
-    //   x_new = x;
-    //   y_new = y - y_space_precise;
-    // }
-    // else if(theta < 5.0 * _PI_NUMBER_ / 4.0 && theta > 3.0 * _PI_NUMBER_ / 4.0) {
-    //   // theta is pi
-    //   x_new = x + x_space_precise;
-    //   y_new = y;
-    // }
-    // else if(theta < 7.0 * _PI_NUMBER_ / 4.0 && theta > 5.0 * _PI_NUMBER_ / 4.0) {
-    //   // theta is 3 * pi / 2
-    //   x_new = x;
-    //   y_new = y + y_space_precise;
-    // }
-    // else {
-    //   // theta is 2 * pi
-    //   x_new = x - x_space_precise;
-    //   y_new = y;
-    // }
     x_new = x - x_space_precise * round(cos(theta));
     y_new = y - y_space_precise * round(sin(theta));
     theta_new = theta;
     break;
 
-  case 3:
+  case 2:
     // turn cw :
     x_new = x;
     y_new = y;
     theta_new = theta - theta_space_precise;
     break;
 
-  case 4:
+  case 3:
     // turn ccw :
     x_new = x;
     y_new = y;
@@ -360,9 +303,9 @@ float QLearning::do_action(float *all_states[], float *state, float *state_new, 
     break;
 
   default:
-    // x_new = 0.0;
-    // y_new = 0.0;
-    // theta_new = 0.0;
+    x_new = x;
+    y_new = y;
+    theta_new = theta;
     break;
   }
 
@@ -371,14 +314,6 @@ float QLearning::do_action(float *all_states[], float *state, float *state_new, 
   *(state_new + 0) = x_new;
   *(state_new + 1) = y_new;
   *(state_new + 2) = theta_new;
-
-  reward += get_reward(all_states, state_new, state, goal_state, action);
-  // interact.state_next = state_new;
-  // std::cout << *(state_new + 0) << "\t" << *(state + 0) << std::endl;
-  // std::cout << *(state_new + 1) << "\t" << *(state + 1) << std::endl;
-  // std::cout << *(state_new + 2) << "\t" << *(state + 2) << std::endl;
-
-  return reward;
 }
 
 float QLearning::get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action) {
@@ -400,10 +335,6 @@ float QLearning::get_reward(float *all_states[], float *current_state, float *pr
     *(current_state + 2) = *(previous_state + 2);
     reward = -10.0;
   }
-  // if(action == 0 || action == 3 || action == 4) {
-  //   reward += -5.0;
-  // }
-
   return reward;
 }
 
