@@ -94,11 +94,11 @@ double sum_array(double arr[]) {
 // end array sum calculator
 
 // begin two array eucliden distance calculator :
-float eucliden_distance(float P1[], float P2[]) {
+float eucliden_distance(float *P1, float *P2, int len) {
 
   float norm = 0.0;
-  for(int i=0; i<2; i++) {
-    norm += (P1[i] - P2[i]) * (P1[i] - P2[i]);
+  for(int i=0; i<len; i++) {
+    norm += (*(P1 + i) - *(P2 + i)) * (*(P1 + i) - *(P2 + i));
   }
   return sqrt(norm);
 }
