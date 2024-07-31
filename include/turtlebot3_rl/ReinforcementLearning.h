@@ -55,6 +55,7 @@ class QLearning {
     void    do_action(float *state, float *state_new, int action);
     float   get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action);
     float  *get_action_values(double reward[], double actions_count[]);
+    // void    log_data();
     
 };
 
@@ -353,5 +354,29 @@ float *QLearning::get_action_values(double reward[], double actions_count[]){
   }
   return action_values;
 }
+
+// void QLearning::log_data() {
+//     // create a text file for log learning process :
+//     std::ofstream learning_data;
+
+//     // file path :
+//     learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/learning_data.txt");
+    
+//     // log algorithm params :
+//     learning_data << "Gamma     = " << gamma << " , " << "alpha    = " << alpha << " , " << "episodes            = " << n_episodes << std::endl;
+//     learning_data << "n actions = " << n_actions << "    , " << "n states = " << n_all_states << " , " << "n state action pair = " << n_state_action_pairs << std::endl;
+//     learning_data << std::endl;
+//     learning_data << "row" << "\t \t " << "x" << "\t \t"  << " y" << "\t \t"  << "theta" << "\t \t"  << "actions" << "\t \t"  << "best action" << "\t \t" << "Q Table" << std::endl;
+    
+//     // log q table and optimal policy :
+//     int index=0; // for log optimal policy
+//     for(int i=0; i<n_state_action_pairs; i++) {
+//         learning_data << i << "\t \t" << *(*(state_action_pairs + i) + 0) << "\t \t" << *(*(state_action_pairs + i) + 1) << "\t \t" << std::setprecision(4) << *(*(state_action_pairs + i) + 2) << "\t \t" << *(*(state_action_pairs + i) + 3) << "\t \t" << *(policy + index) << "\t \t \t" << std::setprecision(4) << *(Qtable + i) << std::endl;
+//         if(((i + 1) % n_actions) == 0) {index++;}
+//     }
+
+//     // save and close file:
+//     learning_data.close();
+// }
 
 #endif
