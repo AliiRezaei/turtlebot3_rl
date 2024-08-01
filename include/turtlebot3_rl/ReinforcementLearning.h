@@ -282,17 +282,73 @@ void QLearning::do_action(float *state, float *state_new, int action) {
   float eps = 0.01;
 
 
-  if(fabs(theta - 0.0) < eps) {
-    r1 = 1.0;
-    r2 = 0.0;
+  // if(fabs(theta - 0.0) < eps) {
+  //   r1 = 1.0;
+  //   r2 = 0.0;
+  // }
+  // else if(fabs(theta - _PI_NUMBER_ / 4.0) < eps) {
+  //   r1 = 1.0;
+  //   r2 = 1.0;
+  // }
+  // else if(fabs(theta - _PI_NUMBER_ / 2.0) < eps) {
+  //   r1 = 0.0;
+  //   r2 = 1.0;
+  // }
+  // else if(fabs(theta - 3 * _PI_NUMBER_ / 4.0) < eps) {
+  //   r1 = - 1.0;
+  //   r2 =   1.0;
+  // }
+  // else if(fabs(theta - _PI_NUMBER_) < eps) {
+  //   r1 = - 1.0;
+  //   r2 =   0.0;
+  // }
+  // else if(fabs(theta - 5 * _PI_NUMBER_ / 4.0) < eps) {
+  //   r1 = - 1.0;
+  //   r2 = - 1.0;
+  // }
+  // else if(fabs(theta - 3 * _PI_NUMBER_ / 2.0) < eps) {
+  //   r1 =   0.0;
+  //   r2 = - 1.0;
+  // }
+  // else if(fabs(theta - 7 * _PI_NUMBER_ / 4.0) < eps) {
+  //   r1 =   1.0;
+  //   r2 = - 1.0;
+  // }
+  // else if(fabs(theta - 2 * _PI_NUMBER_) < eps) {
+  //   r1 =   1.0;
+  //   r2 =   0.0;
+  // }
+  // else {
+  //   std::cout << "Are You Joking?!" << std::endl;
+  // }
+
+  if(fabs(theta + _PI_NUMBER_) < eps) {
+    r1 = - 1.0;
+    r2 =   0.0;
+  }
+  else if(fabs(theta + 3 * _PI_NUMBER_ / 4.0) < eps) {
+    r1 = - 1.0;
+    r2 = - 1.0;
+  }
+  else if(fabs(theta + _PI_NUMBER_ / 2.0) < eps) {
+    r1 =   0.0;
+    r2 = - 1.0;
+  }
+  else if(fabs(theta + _PI_NUMBER_ / 4.0) < eps) {
+    r1 =   1.0;
+    r2 = - 1.0;
+  }
+  else if(fabs(theta) < eps) {
+    r1 =   1.0;
+    r2 =   0.0;
   }
   else if(fabs(theta - _PI_NUMBER_ / 4.0) < eps) {
-    r1 = 1.0;
-    r2 = 1.0;
+    r1 =   1.0;
+    r2 =   1.0;
   }
   else if(fabs(theta - _PI_NUMBER_ / 2.0) < eps) {
-    r1 = 0.0;
-    r2 = 1.0;
+    r1 =   0.0;
+    r2 =   1.0;
   }
   else if(fabs(theta - 3 * _PI_NUMBER_ / 4.0) < eps) {
     r1 = - 1.0;
@@ -300,22 +356,6 @@ void QLearning::do_action(float *state, float *state_new, int action) {
   }
   else if(fabs(theta - _PI_NUMBER_) < eps) {
     r1 = - 1.0;
-    r2 =   0.0;
-  }
-  else if(fabs(theta - 5 * _PI_NUMBER_ / 4.0) < eps) {
-    r1 = - 1.0;
-    r2 = - 1.0;
-  }
-  else if(fabs(theta - 3 * _PI_NUMBER_ / 2.0) < eps) {
-    r1 =   0.0;
-    r2 = - 1.0;
-  }
-  else if(fabs(theta - 7 * _PI_NUMBER_ / 4.0) < eps) {
-    r1 =   1.0;
-    r2 = - 1.0;
-  }
-  else if(fabs(theta - 2 * _PI_NUMBER_) < eps) {
-    r1 =   1.0;
     r2 =   0.0;
   }
   else {
