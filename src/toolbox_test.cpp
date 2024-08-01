@@ -1,13 +1,14 @@
 #include "turtlebot3_rl/Toolbox.h"
 #include "turtlebot3_rl/ReinforcementLearning.h"
+#include "turtlebot3_rl/TurtleMove.h"
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <iomanip>
 
-int main() {
+int main(int argc, char **argv) {
 
-    int   n_actions = 4;
+    int   n_actions = 3;
     float epsilon   = 0.9;
 
     // rl object :
@@ -30,7 +31,7 @@ int main() {
     struct stateInfo theta;
     theta.min =  0.0;
     theta.max =  2.0 * _PI_NUMBER_;
-    theta.n   =  5;
+    theta.n   =  9;
 
     // create states space :
     float **all_states = rl.create_states(x, y, theta);
@@ -65,13 +66,13 @@ int main() {
     // }
 
     // learning params :
-    int   n_episodes = 500;
+    int   n_episodes = 300;
     float gamma      = 0.990;
     float alpha      = 0.100;
     struct Interaction int_with_env;
 
     // goal selection :
-    float  goal_state[] = {0.0, 0.0};
+    float  goal_state[] = {5.0, -4.0};
     float *goal = goal_state;
 
     // initialize polices :
@@ -109,7 +110,6 @@ int main() {
     // init paired state and action in each episode :
     float *state_action_paired = new float[n_columns_action_pairs];
     
-
     // init state_action_paired_idx for calculat the best idx that maximized q table :
     int  state_action_paired_idx;
 
@@ -119,7 +119,7 @@ int main() {
     // max finder object :
     maxFind max_of_Qtable;
 
-    // init reward per episode var :
+    // reward per episode :
     float rpe = 0.0;
 
     int i = 0;
@@ -155,6 +155,8 @@ int main() {
 
             // calculate reward :
             reward = rl.get_reward(all_states, state_next, state, goal, action);
+
+            // std::cout << *(state_next + 0) << "\t" << *(state_next + 1) << "\t" << *(state_next + 2) << std::endl;
 
             // // test do_action correct works or not :
             // std::cout << *(state_next + 0) << "\t" << *(state + 0) << std::endl;
@@ -238,17 +240,127 @@ int main() {
     //     if(((i + 1) % n_actions) == 0) {index++;}
     // }
 
-    // save and close file:
-    learning_data.close();
+    // // save and close file:
+    // learning_data.close();
 
-    // // test results :
-    // // init node :
-    // ros::init(argc, argv, "FuckingNode");
+    // test results :
+    // init node :
+    ros::init(argc, argv, "test_results_node");
     
-    // // TurtleBot3 object :
-    // TurtleBot3 robot;
+    // TurtleBot3 object :
+    TurtleBot3 robot;
+
+    // start pose :
+    float p[] = {0.0, 0.0, 0.0};
+    float *pose = p;
+
+    float x_test;
+    float y_test;
+    float theta_test;
+
+    float x_new_test;
+    float y_new_test;
+    float theta_new_test;
+
+    float x_space_precise_test = (x.max - x.min) / (x.n - 1.0);
+    float y_space_precise_test = (y.max - y.min) / (y.n - 1.0);
+    float theta_space_precise_test = (theta.max - theta.min) / (theta.n - 1.0);
+
+    while(ros::ok()) {
+
+        // search pose in all states :
+        state_idx = ismember<float>(pose, all_states, n_all_states, n_columns);
+        action = *(policy + state_idx);
+
+        x_test     = *(pose + 0);
+        y_test     = *(pose + 1);
+        theta_test = *(pose + 2);   
+        
+        
+        float r1;
+        float r2;
+
+        float eps = 0.01;
 
 
+        if(fabs(theta_test - 0.0) < eps) {
+          r1 = 1.0;
+          r2 = 0.0;
+        }
+        else if(fabs(theta_test - _PI_NUMBER_ / 4.0) < eps) {
+          r1 = 1.0;
+          r2 = 1.0;
+        }
+        else if(fabs(theta_test - _PI_NUMBER_ / 2.0) < eps) {
+          r1 = 0.0;
+          r2 = 1.0;
+        }
+        else if(fabs(theta_test - 3 * _PI_NUMBER_ / 4.0) < eps) {
+          r1 = - 1.0;
+          r2 =   1.0;
+        }
+        else if(fabs(theta_test - _PI_NUMBER_) < eps) {
+          r1 = - 1.0;
+          r2 =   0.0;
+        }
+        else if(fabs(theta_test - 5 * _PI_NUMBER_ / 4.0) < eps) {
+          r1 = - 1.0;
+          r2 = - 1.0;
+        }
+        else if(fabs(theta_test - 3 * _PI_NUMBER_ / 2.0) < eps) {
+          r1 =   0.0;
+          r2 = - 1.0;
+        }
+        else if(fabs(theta_test - 7 * _PI_NUMBER_ / 4.0) < eps) {
+          r1 =   1.0;
+          r2 = - 1.0;
+        }
+        else if(fabs(theta_test - 2 * _PI_NUMBER_) < eps) {
+          r1 =   1.0;
+          r2 =   0.0;
+        }
+        else {
+          std::cout << "Are You Joking?!" << std::endl;
+        }   
+        switch (action)
+        {
+        case 0:
+          // move forward in theta direcction :
+          x_new_test = x_test + x_space_precise_test * r1;
+          y_new_test = y_test + y_space_precise_test * r2;
+          theta_new_test = theta_test;
+          robot.move_forward_meters(x_space_precise_test);
+          break;
 
+        case 1:
+          // turn cw :
+          x_new_test = x_test;
+          y_new_test = y_test;
+          theta_new_test = theta_test - theta_space_precise_test;
+          robot.turn_in_radians(-theta_space_precise_test);
+          break;
+
+        case 2:
+          // turn ccw :
+          x_new_test = x_test;
+          y_new_test = y_test;
+          theta_new_test = theta_test + theta_space_precise_test;
+          robot.turn_in_radians(+theta_space_precise_test);
+          break;
+
+        default:
+          x_new_test = x_test;
+          y_new_test = y_test;
+          theta_new_test = theta_test;
+          break;
+        }
+        *(pose + 0) = x_new_test;
+        *(pose + 1) = y_new_test;
+        *(pose + 2) = theta_new_test;
+        // check reach goal state :
+        if(*(pose + 0) == *(goal + 0) && *(pose + 1) == *(goal + 1)) {
+          break;
+        }
+    }
     return 0;
 }

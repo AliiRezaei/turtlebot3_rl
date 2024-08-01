@@ -174,6 +174,9 @@ target_link_libraries(main ${catkin_LIBRARIES})
 add_executable(toolbox_test src/toolbox_test.cpp)
 target_link_libraries(toolbox_test ${catkin_LIBRARIES})
 
+add_executable(turtlebot3_class_test src/turtlebot3_class_test.cpp)
+target_link_libraries(turtlebot3_class_test ${catkin_LIBRARIES})
+
 # add_executable(TurtleMoveTest src/TurtleMove.cpp)
 # target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
 

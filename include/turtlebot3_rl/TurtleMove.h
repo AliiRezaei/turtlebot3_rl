@@ -6,18 +6,10 @@
 #include "geometry_msgs/Twist.h"
 #include "sensor_msgs/LaserScan.h"
 #include "nav_msgs/Odometry.h"
-#include <string.h>
-#include <math.h>
 #include <turtlebot3_rl/Toolbox.h>
-
-
-using namespace std;
-
-
 
 class TurtleBot3 {
 private:
-
   // create node handler for communicating with nodes :
   ros::NodeHandle n;
 
@@ -61,12 +53,12 @@ public:
 
   // constructor :
   TurtleBot3();
-  
-  // move forward for 2 seconds :
-  void move();
 
   // extract roll, pitch, yaw from quaternion :
   void Quaternion2RollPitchYaw();
+  
+  // move forward for 2 seconds :
+  void move();
 
   // move forward for n_secs seconds :
   void move_forward(int n_secs);
@@ -81,10 +73,13 @@ public:
   void move_backward_meters(float meters);
 
   // turn "cw" or "ccw" for n_secs seconds :
-  void turn(string clock, int n_secs);
+  void turn(std::string clock, int n_secs);
 
   // turn arbit degrees :
   void turn_degree(float deg);
+
+  // turn arbit radians :
+  void turn_in_radians(float rad);
 
   // go to the target pose :
   void go_target(float *current_pose, float *target_pose);
@@ -92,16 +87,22 @@ public:
   // stop moving :
   void stop_moving();
 
-  // get x, y, z (param should be x or y or z): 
-  float get_position(int param);
+  // get x, y, z (coordinate_index should be 1 or 2 or 3): 
+  float get_position(int coordinate_index);
 
-  // get any x, y, z :
+  // get all x, y, z positions :
   std::list<float> get_position_full();
+
+  // get roll, pitch, yaw (coordinate_index should be 1 or 2 or 3): 
+  float get_orientation(int coordinate_index);
+
+  // get all roll, pitch, yaw angles :
+  std::list<float> get_orientation_full();
 
   // calculate time :
   double get_time();
 
-  // get laser info in one direction (1 to 720) :
+  // get laser info in one direction (1 - 1 to 720 - 1) :
   float get_laser(int index);
 
   // get laser info in all directions :
@@ -134,7 +135,6 @@ TurtleBot3::TurtleBot3() {
 
 void TurtleBot3::laser_callback(const sensor_msgs::LaserScan::ConstPtr &laser_msg) {
   laser_range = laser_msg->ranges;
-  // ROS_INFO("Laser value: %f", laser_range);
 }
 void TurtleBot3::odom_callback(const nav_msgs::Odometry::ConstPtr &odom_msg) {
   
@@ -156,21 +156,24 @@ void TurtleBot3::odom_callback(const nav_msgs::Odometry::ConstPtr &odom_msg) {
   // turtlebot3 quaternion z_quat:
   z_quat = odom_msg->pose.pose.orientation.z;
   
-  // turtlebot3 quaternion y_quat:
+  // turtlebot3 quaternion w_quat:
   w_quat = odom_msg->pose.pose.orientation.w;
 
   // quat to rpy :
   Quaternion2RollPitchYaw();
-
 }
 
 void TurtleBot3::Quaternion2RollPitchYaw() {
+  // pitch (x-axis rotation) :
+  roll = std::atan2(2 * (w_quat * x_quat + y_quat * z_quat), 1 - 2 * (x_quat * x_quat + y_quat * y_quat));
 
-  this->roll  = atan2(2.0*(y_quat*z_quat + w_quat*x_quat), w_quat*w_quat - x_quat*x_quat - y_quat*y_quat + z_quat*z_quat);
-  this->pitch = asin(-2.0*(x_quat*z_quat - w_quat*y_quat));
-  this->yaw   = atan2(2.0*(x_quat*y_quat + w_quat*z_quat), w_quat*w_quat + x_quat*x_quat - y_quat*y_quat - z_quat*z_quat);
+  // pitch (y-axis rotation) :
+  pitch = 2 * std::atan2(std::sqrt(1 + 2 * (w_quat * y_quat - x_quat * z_quat)), std::sqrt(1 - 2 * (w_quat * y_quat - x_quat * z_quat))) - M_PI / 2;
 
+  // yaw (z-axis rotation) :
+  yaw = std::atan2(2 * (w_quat * z_quat + x_quat * y_quat), 1 - 2 * (y_quat * y_quat + z_quat * z_quat));
 }
+
 void TurtleBot3::move() {
   // Rate of publishing
   ros::Rate rate(10);
@@ -220,50 +223,37 @@ void TurtleBot3::move_forward(int time) {
   vel_pub.publish(vel_msg);
 } // end of move_forward
 
-// void TurtleBot3::move_forward_meters(float meters) 
-// {
-//   // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
-
-//   // rate of publishing :
-//   ros::Rate rate(10);
-//   ros::Time start_time = ros::Time::now();
-
-//   // target position and stop criteria :
-//   float x_target = x_pos + meters;
-//   double eps = 0.0001;
-
-//   // go forward until reaching target position :
-//   while (x_target - x_pos > eps) {
-//     // ROS_INFO_STREAM("Moving forward " << meters << " meters");
-//     ros::spinOnce();
-//     vel_msg.linear.x = 0.2;
-//     // vel_msg.linear.x = 0.3 * (x_target - x_pos);
-//     vel_msg.linear.y = 0.0;
-//     vel_msg.angular.z = 0.0;
-//     vel_pub.publish(vel_msg);
-//     rate.sleep();
-//   }
-
-//   // stop moving :
-//   vel_msg.linear.x = 0.0;
-//   vel_msg.angular.z = 0.0;
-//   vel_pub.publish(vel_msg);
-  
-//   // print robot moving status :
-//   ros::Time end_time = ros::Time::now();
-//   // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
-// }
-
-
 void TurtleBot3::move_forward_meters(float meters) {
-  vel_msg.linear.x  = 0.08;
-  vel_msg.linear.y  = 0.0;
+  // rate of publishing:
+  ros::Rate rate(30);
+
+  // target position and stop criteria:
+  float x_start = x_pos;
+  float y_start = y_pos;
+  double distance_traveled = 0.0;
+  double eps = 0.001;
+
+  // go forward until reaching target distance:
+  while (ros::ok() && distance_traveled < meters - eps) {
+    ros::spinOnce();
+
+    // Calculate the current distance traveled
+    distance_traveled = sqrt((x_pos - x_start) * (x_pos - x_start) + (y_pos - y_start) * (y_pos - y_start));
+
+    vel_msg.linear.x = 0.2;
+    vel_msg.linear.y = 0.0;
+    vel_msg.angular.z = 0.0;
+    vel_pub.publish(vel_msg);
+
+    rate.sleep();
+  }
+
+  // stop moving:
+  vel_msg.linear.x = 0.0;
   vel_msg.angular.z = 0.0;
   vel_pub.publish(vel_msg);
+  rate.sleep(); 
 }
-
-
-
 
 void TurtleBot3::move_backward(int time) {
   // Rate of publishing
@@ -285,59 +275,47 @@ void TurtleBot3::move_backward(int time) {
   vel_pub.publish(vel_msg);
 }
 
-// void TurtleBot3::move_backward_meters(float meters) 
-// {
-//   // ROS_INFO_STREAM("Robot has started from x = " << x_pos);
-
-//   // rate of publishing :
-//   ros::Rate rate(10);
-//   ros::Time start_time = ros::Time::now();
-
-//   // target position and stop criteria :
-//   float x_target = x_pos - meters;
-//   double eps = 0.0001;
-
-//   // go forward until reaching target position :
-//   while (x_pos - x_target > eps) {
-//     // ROS_INFO_STREAM("Moving forward " << meters << " meters");
-//     ros::spinOnce();
-//     vel_msg.linear.x = -0.2;
-//     // vel_msg.linear.x = -0.3 * (x_pos - x_target);
-//     vel_msg.linear.y = 0.0;
-//     vel_msg.angular.z = 0.0;
-//     vel_pub.publish(vel_msg);
-//     rate.sleep();
-//   }
-
-//   // stop moving :
-//   vel_msg.linear.x = 0.0;
-//   vel_msg.angular.z = 0.0;
-//   vel_pub.publish(vel_msg);
-  
-//   // print robot moving status :
-//   ros::Time end_time = ros::Time::now();
-//   // ROS_INFO_STREAM("Robot reached " << x_pos << " after " << end_time - start_time << " seconds");
-// }
-
 void TurtleBot3::move_backward_meters(float meters) {
-  vel_msg.linear.x  = - 0.08;
-  vel_msg.linear.y  =   0.0;
-  vel_msg.angular.z =   0.0;
+  // rate of publishing:
+  ros::Rate rate(30);
+
+  // target position and stop criteria:
+  float x_start = x_pos;
+  float y_start = y_pos;
+  double distance_traveled = 0.0;
+  double eps = 0.001;
+
+  // go backward until reaching target distance:
+  while (ros::ok() && distance_traveled < meters - eps) {
+    ros::spinOnce();
+
+    // Calculate the current distance traveled
+    distance_traveled = sqrt((x_pos - x_start) * (x_pos - x_start) + (y_pos - y_start) * (y_pos - y_start));
+
+    vel_msg.linear.x = -0.2;
+    vel_msg.linear.y = 0.0;
+    vel_msg.angular.z = 0.0;
+    vel_pub.publish(vel_msg);
+
+    rate.sleep();
+  }
+
+  // stop moving:
+  vel_msg.linear.x = 0.0;
+  vel_msg.angular.z = 0.0;
   vel_pub.publish(vel_msg);
+  rate.sleep(); 
 }
 
-
-void TurtleBot3::turn(string clock, int n_secs) {
+void TurtleBot3::turn(std::string clock, int n_secs) {
   ros::Rate rate(10);
   ros::Time start_time = ros::Time::now();
   ros::Duration timeout(n_secs);
 
   double WZ = 0.0;
   if (clock == "clockwise") {
-    // ROS_INFO_STREAM("Turning clockwise..............");
     WZ = -2.5;
   } else if (clock == "counterclockwise") {
-    // ROS_INFO_STREAM("Turning counterclockwise ........... ");
     WZ = 2.5;
   }
 
@@ -353,12 +331,11 @@ void TurtleBot3::turn(string clock, int n_secs) {
   vel_pub.publish(vel_msg);
 }
 
-void TurtleBot3::turn_degree(float deg)
-{
+void TurtleBot3::turn_degree(float deg) {
   // Rate of publishing
   ros::Rate rate(10);
 
-  double theta_target = deg * 3.14159265 / 180.0 + yaw;
+  double theta_target = deg * M_PI / 180.0 + yaw;
 
   int sign_theta = 0;
   if(deg > 0.0) {sign_theta =  1;}
@@ -372,7 +349,6 @@ void TurtleBot3::turn_degree(float deg)
     vel_msg.linear.y = 0.0;
     vel_msg.angular.z = sign_theta * 0.3;
     vel_pub.publish(vel_msg);
-    // ROS_INFO_STREAM("Turning " << deg << " degrees");
     rate.sleep(); 
   }
   vel_msg.linear.x = 0.0;
@@ -381,9 +357,50 @@ void TurtleBot3::turn_degree(float deg)
   vel_pub.publish(vel_msg);
 }
 
+void TurtleBot3::turn_in_radians(float rad) {
+  // Rate of publishing
+  ros::Rate rate(30);
+
+  // Calculate target angle in radians
+  double theta_target = yaw + rad;
+  theta_target = atan2(sin(theta_target), cos(theta_target)); // Normalize target angle
+
+  // Set the direction of rotation
+  int sign_theta = (rad > 0.0) ? 1 : -1;
+  double eps = 0.01; // Tolerance for the stopping condition
+
+  // Continue turning until the target angle is reached
+  while (true) {
+    ros::spinOnce(); // Get the latest odometry information
+
+    // Calculate the current angle difference
+    double angle_diff = theta_target - yaw;
+    angle_diff = atan2(sin(angle_diff), cos(angle_diff)); // Normalize angle difference
+
+    if (fabs(angle_diff) < eps) {
+      break; // Target angle reached
+    }
+
+    // Set the rotation velocity
+    vel_msg.linear.x = 0.0;
+    vel_msg.linear.y = 0.0;
+    vel_msg.angular.z = sign_theta * 0.45;
+
+    // Publish the velocity message
+    vel_pub.publish(vel_msg);
+
+    rate.sleep();
+  }
+
+  // Stop the robot
+  vel_msg.linear.x = 0.0;
+  vel_msg.linear.y = 0.0;
+  vel_msg.angular.z = 0.0;
+  vel_pub.publish(vel_msg);
+  rate.sleep(); 
+}
 
 void TurtleBot3::stop_moving() {
-  // ROS_INFO_STREAM("Stopping the robot ........... ");
   vel_msg.linear.x = 0.0;
   vel_msg.linear.y = 0.0;
   vel_msg.angular.z = 0.0;
@@ -391,7 +408,6 @@ void TurtleBot3::stop_moving() {
 }
 
 void TurtleBot3::go_target(float *current_pose, float *target_pose) {
-
 
   // extract target_pose :
   float target_x     = *(target_pose + 0);
@@ -404,7 +420,7 @@ void TurtleBot3::go_target(float *current_pose, float *target_pose) {
   float current_theta = *(current_pose + 2);
 
   // normalize target_theta :
-  if(target_theta > _PI_NUMBER_) {target_theta -= 2.0 * _PI_NUMBER_;}
+  if(target_theta > M_PI) {target_theta -= 2.0 * M_PI;}
 
   // init loop params :
   float distance;   // distance between actual position and target position
@@ -417,32 +433,36 @@ void TurtleBot3::go_target(float *current_pose, float *target_pose) {
   float w_scal;     // scaled angular vel
 
   // gains :
-    float K_distannce =   2.0;
-    float K_alpha     =  15.0;
-    float K_beta      = - 3.0;
-    float V_const     =   0.1;
+  float K_distannce =   2.0;
+  float K_alpha     =  15.0;
+  float K_beta      = - 3.0;
+  float V_const     =   0.1;
 
   // reaching precise :
-  float eps = 0.0001;
+  float eps = 0.01;
 
   // reaching status :
   bool robot_in_target = false;
 
   // main loop :
-  while(!robot_in_target) {
+  while(!robot_in_target && ros::ok()) {
 
+    // ros::spinOnce();
+    ros::Rate rate(10);
+    // std::cout << "fuck" << std::endl;
+    
     // update distance :
     distance = eucliden_distance(current_pose, target_pose, 2);
-
+    
     // update lambda :
     lambda = atan2(target_y - current_y, target_x - current_x);
-
+    
     // update alpha and beta :
-    alpha = (lambda -  current_theta + pi) % (2 * _PI_NUMBER_) - _PI_NUMBER_;
-    beta  = (target_theta - lambda + pi) % (2 * _PI_NUMBER_) - _PI_NUMBER_;
-
+    alpha = std::fmod(lambda - current_theta + M_PI, 2 * M_PI) - M_PI;
+    beta  = std::fmod(target_theta - lambda + M_PI, 2 * M_PI) - M_PI;
+    
     // check reaching status :
-    if(distance < eps && abs(current_theta - target_theta) < eps) {
+    if(distance < eps) {
       vel_msg.linear.x  = 0.0;
       vel_msg.linear.y  = 0.0;
       vel_msg.angular.z = 0.0;
@@ -450,37 +470,45 @@ void TurtleBot3::go_target(float *current_pose, float *target_pose) {
       robot_in_target = true;
     }
     else {
-      float v = K_distannce * distance;
-      float w = K_alpha * alpha + K_beta * beta;
-      float v_scal = v / abs(v) * V_const;
-      float w_scal = w / abs(v) * V_const;
-
+      v = K_distannce * distance;
+      w = K_alpha * alpha + K_beta * beta;
+      v_scal = v / abs(v) * V_const;
+      w_scal = w / abs(v) * V_const;
       vel_msg.linear.x  = v_scal;
       vel_msg.linear.y  = 0.0;
-      vel_msg.angular.z = w_scal;
+      // vel_msg.angular.z = w_scal;
       vel_pub.publish(vel_msg);
     }
-
+    std::cout << vel_msg.linear.x << "\t" << vel_msg.angular.z << std::endl;
+    rate.sleep(); 
     // update pose :
-    *(current_pose + 0) = this->x_pos;
-    *(current_pose + 1) = this->y_pos;
-    *(current_pose + 2) = this->yaw;
+    *(current_pose + 0) = x_pos;
+    *(current_pose + 1) = y_pos;
+    *(current_pose + 2) = yaw;
   }
 }
 
-float TurtleBot3::get_position(int param) {
-  if (param == 1) {
-    return this->x_pos;
-  } else if (param == 2) {
-    return this->y_pos;
-  } else if (param == 3) {
-    return this->z_pos;
-  }
-  return 0;
+float TurtleBot3::get_position(int coordinate_index) {
+  if (coordinate_index == 1)        {return this->x_pos;}
+    else if (coordinate_index == 2) {return this->y_pos;}
+    else if (coordinate_index == 3) {return this->z_pos;}
+  else {return 0;}
 }
 
-list<float> TurtleBot3::get_position_full() {
-  list<float> coordinates({this->x_pos, this->y_pos, this->z_pos});
+std::list<float> TurtleBot3::get_position_full() {
+  std::list<float> coordinates({this->x_pos, this->y_pos, this->z_pos});
+  return coordinates;
+}
+
+float TurtleBot3::get_orientation(int coordinate_index) {
+  if (coordinate_index == 1)        {return this->roll;}
+    else if (coordinate_index == 2) {return this->pitch;}
+    else if (coordinate_index == 3) {return this->yaw;}
+  else {return 0;}
+}
+
+std::list<float> TurtleBot3::get_orientation_full() {
+  std::list<float> coordinates({this->roll, this->pitch, this->yaw});
   return coordinates;
 }
 

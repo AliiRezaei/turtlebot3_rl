@@ -5,6 +5,7 @@
 // #include "nav_msgs/Odometry.h"
 // #include <string.h>
 // #include <math.h>
+// #include <cmath>
 // #include <random>
 // #include <iostream>
 // using namespace std;
@@ -122,14 +123,33 @@
 //   return 0;
 // } 
 
-
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "geometry_msgs/Twist.h"
+#include "sensor_msgs/LaserScan.h"
+#include "nav_msgs/Odometry.h"
 #include "turtlebot3_rl/TurtleMove.h"
 #include "turtlebot3_rl/Toolbox.h"
 #include <iostream>
 
-int main() {
+int main(int argc, char **argv) {
 
+    ros::init(argc, argv, "test_go_target_node");
+
+    TurtleBot3 robot;
+
+    robot.move_forward_meters(1.0);
+    robot.turn_in_radians(M_PI / 2.0);
+
+    robot.move_forward_meters(1.0);
+    robot.turn_in_radians(M_PI / 2.0);
     
+    robot.move_forward_meters(1.0);
+    robot.turn_in_radians(M_PI / 2.0);
+    
+    robot.move_forward_meters(1.0);
+
+    robot.stop_moving();
 
     return 0;
 }

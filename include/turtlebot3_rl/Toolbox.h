@@ -2,12 +2,12 @@
 #define _TOOLBOX_
 
 #include <string>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <random>
 #include <vector>
 
-#define _PI_NUMBER_ 3.14159265
+#define _PI_NUMBER_ 3.14159
 
 template <typename InputType, std::size_t N>
 std::size_t array_length(InputType (&arr)[N]) {

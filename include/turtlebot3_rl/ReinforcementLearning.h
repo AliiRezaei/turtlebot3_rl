@@ -272,31 +272,73 @@ void QLearning::do_action(float *state, float *state_new, int action) {
   float x_new;
   float y_new;
   float theta_new;
+
+  // float r1 = (cos(theta) > 0.0) ? 1.0 : -1.0;
+  // float r2 = (sin(theta) > 0.0) ? 1.0 : -1.0;
+
+  float r1;
+  float r2;
+
+  float eps = 0.01;
+
+
+  if(fabs(theta - 0.0) < eps) {
+    r1 = 1.0;
+    r2 = 0.0;
+  }
+  else if(fabs(theta - _PI_NUMBER_ / 4.0) < eps) {
+    r1 = 1.0;
+    r2 = 1.0;
+  }
+  else if(fabs(theta - _PI_NUMBER_ / 2.0) < eps) {
+    r1 = 0.0;
+    r2 = 1.0;
+  }
+  else if(fabs(theta - 3 * _PI_NUMBER_ / 4.0) < eps) {
+    r1 = - 1.0;
+    r2 =   1.0;
+  }
+  else if(fabs(theta - _PI_NUMBER_) < eps) {
+    r1 = - 1.0;
+    r2 =   0.0;
+  }
+  else if(fabs(theta - 5 * _PI_NUMBER_ / 4.0) < eps) {
+    r1 = - 1.0;
+    r2 = - 1.0;
+  }
+  else if(fabs(theta - 3 * _PI_NUMBER_ / 2.0) < eps) {
+    r1 =   0.0;
+    r2 = - 1.0;
+  }
+  else if(fabs(theta - 7 * _PI_NUMBER_ / 4.0) < eps) {
+    r1 =   1.0;
+    r2 = - 1.0;
+  }
+  else if(fabs(theta - 2 * _PI_NUMBER_) < eps) {
+    r1 =   1.0;
+    r2 =   0.0;
+  }
+  else {
+    std::cout << "Are You Joking?!" << std::endl;
+  }
   
   switch (action)
   {
   case 0:
     // move forward in theta direcction :
-    x_new = x + x_space_precise * round(cos(theta));
-    y_new = y + y_space_precise * round(sin(theta));
+    x_new = x + x_space_precise * r1;
+    y_new = y + y_space_precise * r2;
     theta_new = theta;
     break;
   
   case 1:
-    // move backward in theta direcction :
-    x_new = x - x_space_precise * round(cos(theta));
-    y_new = y - y_space_precise * round(sin(theta));
-    theta_new = theta;
-    break;
-
-  case 2:
     // turn cw :
     x_new = x;
     y_new = y;
     theta_new = theta - theta_space_precise;
     break;
 
-  case 3:
+  case 2:
     // turn ccw :
     x_new = x;
     y_new = y;
@@ -311,6 +353,8 @@ void QLearning::do_action(float *state, float *state_new, int action) {
   }
 
   float reward = 0.0;
+
+  // std::cout << x_new << "\t" << y_new << "\t" << theta_new << std::endl;
 
   *(state_new + 0) = x_new;
   *(state_new + 1) = y_new;
