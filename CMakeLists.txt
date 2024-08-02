@@ -177,6 +177,12 @@ target_link_libraries(toolbox_test ${catkin_LIBRARIES})
 add_executable(turtlebot3_class_test src/turtlebot3_class_test.cpp)
 target_link_libraries(turtlebot3_class_test ${catkin_LIBRARIES})
 
+add_executable(learning_empty_world src/learning_empty_world.cpp)
+target_link_libraries(learning_empty_world ${catkin_LIBRARIES})
+
+add_executable(main_empty_world src/main_empty_world.cpp)
+target_link_libraries(main_empty_world ${catkin_LIBRARIES})
+
 # add_executable(TurtleMoveTest src/TurtleMove.cpp)
 # target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
 
