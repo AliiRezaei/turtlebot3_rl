@@ -189,6 +189,12 @@ target_link_libraries(main_world ${catkin_LIBRARIES})
 add_executable(learning_world src/learning_world.cpp)
 target_link_libraries(learning_world ${catkin_LIBRARIES})
 
+add_executable(learning_house src/learning_house.cpp)
+target_link_libraries(learning_house ${catkin_LIBRARIES})
+
+add_executable(main_house src/main_house.cpp)
+target_link_libraries(main_house ${catkin_LIBRARIES})
+
 # add_executable(TurtleMoveTest src/TurtleMove.cpp)
 # target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
 
