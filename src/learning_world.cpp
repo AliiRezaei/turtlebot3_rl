@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     std::size_t n_columns_action_pairs = n_columns + 1;
 
     // learning params :
-    int   n_episodes = 10000;
+    int   n_episodes = 25000;
     float gamma      = 0.990;
     float alpha      = 0.100;
 
@@ -178,27 +178,27 @@ int main(int argc, char **argv) {
         epsilon = epsilon * 0.97;
     }
 
-    // // create a text file for log learning process :
-    // std::ofstream learning_data;
+    // create a text file for log learning process :
+    std::ofstream learning_data;
 
-    // // file path :
-    // learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/data_world.txt");
+    // file path :
+    learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/data_world.txt");
     
-    // // log algorithm params :
-    // learning_data << "Gamma     = " << gamma << " , " << "alpha    = " << alpha << " , " << "episodes            = " << n_episodes << std::endl;
-    // learning_data << "n actions = " << n_actions << "    , " << "n states = " << n_all_states << " , " << "n state action pair = " << n_state_action_pairs << std::endl;
-    // learning_data << std::endl;
-    // learning_data << "row" << "\t \t " << "x" << "\t \t"  << " y" << "\t \t"  << "theta" << "\t \t"  << "actions" << "\t \t"  << "best action" << "\t \t" << "Q Table" << std::endl;
+    // log algorithm params :
+    learning_data << "Gamma     = " << gamma << " , " << "alpha    = " << alpha << " , " << "episodes            = " << n_episodes << std::endl;
+    learning_data << "n actions = " << n_actions << "    , " << "n states = " << n_all_states << " , " << "n state action pair = " << n_state_action_pairs << std::endl;
+    learning_data << std::endl;
+    learning_data << "row" << "\t \t " << "x" << "\t \t"  << " y" << "\t \t"  << "theta" << "\t \t"  << "actions" << "\t \t"  << "best action" << "\t \t" << "Q Table" << std::endl;
     
-    // // log q table and optimal policy :
-    // int index=0; // for log optimal policy
-    // for(int i=0; i<n_state_action_pairs; i++) {
-    //     learning_data << i << "\t \t" << *(*(state_action_pairs + i) + 0) << "\t \t" << *(*(state_action_pairs + i) + 1) << "\t \t" << std::setprecision(4) << *(*(state_action_pairs + i) + 2) << "\t \t" << *(*(state_action_pairs + i) + 3) << "\t \t" << *(policy + index) << "\t \t \t" << std::setprecision(4) << *(Qtable + i) << std::endl;
-    //     if(((i + 1) % n_actions) == 0) {index++;}
-    // }
+    // log q table and optimal policy :
+    int index=0; // for log optimal policy
+    for(int i=0; i<n_state_action_pairs; i++) {
+        learning_data << i << "\t \t" << *(*(state_action_pairs + i) + 0) << "\t \t" << *(*(state_action_pairs + i) + 1) << "\t \t" << std::setprecision(4) << *(*(state_action_pairs + i) + 2) << "\t \t" << *(*(state_action_pairs + i) + 3) << "\t \t" << *(policy + index) << "\t \t \t" << std::setprecision(4) << *(Qtable + i) << std::endl;
+        if(((i + 1) % n_actions) == 0) {index++;}
+    }
 
-    // // save and close file:
-    // learning_data.close();
+    // save and close file:
+    learning_data.close();
 
     // // init node :
     // ros::init(argc, argv, "main_empty_world_node");
