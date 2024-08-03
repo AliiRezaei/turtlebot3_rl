@@ -422,16 +422,47 @@ float **QLearning::get_collisions(std::string world_name) {
         }
       }
     }
-  delete[] col_x;
-  delete[] col_y;
-  delete[] col_theta;
-  return collision_pairs;
+    delete[] col_x;
+    delete[] col_y;
+    delete[] col_theta;
+    return collision_pairs;
   }
-  else if(world_name == "house") {
-    // house code
-  }
-  else {
-    // error
+  else { // house
+    // x axis collisions :
+    std::size_t col_x_n = 1;
+    float col_x = -5.0;
+
+    // y axis collisions :
+    std::size_t col_y_n = 5;
+    float *col_y = linspace<float>(0.5, 2.5, col_y_n);
+
+    // all of theta space :
+    std::size_t col_theta_n = this->theta_space_size;
+    float *col_theta = linspace<float>(- _PI_NUMBER_, + _PI_NUMBER_, col_theta_n);
+
+    // collision_pairs matrix row, col size :
+    std::size_t collisions_row = col_x_n * col_y_n * col_theta_n;
+    std::size_t collisions_col = 3;
+
+    // allocate memory for the collision_pairs matrix :
+    float **collision_pairs = new float*[collisions_row];
+    for (std::size_t i = 0; i < collisions_row; i++) {
+        collision_pairs[i] = new float[collisions_col];
+    }
+
+    for(std::size_t i = 0; i < col_x_n; i++) {
+      for(std::size_t j = 0; j < col_y_n; j++) {
+        for(std::size_t k = 0; k < col_theta_n; k++) {
+          std::size_t index = i * (col_y_n * col_theta_n) + j * col_theta_n + k;
+          *(*(collision_pairs + index) + 0) = col_x;
+          *(*(collision_pairs + index) + 1) = col_y[j];
+          *(*(collision_pairs + index) + 2) = col_theta[k];
+        }
+      }
+    }
+    delete[] col_y;
+    delete[] col_theta;
+    return collision_pairs;
   }
 }
 
