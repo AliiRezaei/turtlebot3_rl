@@ -384,7 +384,7 @@ void TurtleBot3::turn_in_radians(float rad) {
     // Set the rotation velocity
     vel_msg.linear.x = 0.0;
     vel_msg.linear.y = 0.0;
-    vel_msg.angular.z = sign_theta * 0.45;
+    vel_msg.angular.z = sign_theta * 0.35;
 
     // Publish the velocity message
     vel_pub.publish(vel_msg);
