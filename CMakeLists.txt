@@ -183,6 +183,12 @@ target_link_libraries(learning_empty_world ${catkin_LIBRARIES})
 add_executable(main_empty_world src/main_empty_world.cpp)
 target_link_libraries(main_empty_world ${catkin_LIBRARIES})
 
+add_executable(main_world src/main_world.cpp)
+target_link_libraries(main_world ${catkin_LIBRARIES})
+
+add_executable(learning_world src/learning_world.cpp)
+target_link_libraries(learning_world ${catkin_LIBRARIES})
+
 # add_executable(TurtleMoveTest src/TurtleMove.cpp)
 # target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
 
