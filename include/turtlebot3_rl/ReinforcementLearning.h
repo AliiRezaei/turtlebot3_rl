@@ -54,6 +54,7 @@ class QLearning {
     float  *random_init_Qtable(int num, float min_rand, float max_rand);
     void    do_action(float *state, float *state_new, int action);
     float   get_reward(float *all_states[], float *current_state, float *previous_state, float *goal_state, int action);
+    float **get_collisions(std::string world_name);
     float  *get_action_values(double reward[], double actions_count[]);
     // void    log_data();
     
@@ -380,6 +381,58 @@ float QLearning::get_reward(float *all_states[], float *current_state, float *pr
     reward = -10.0;
   }
   return reward;
+}
+
+float **QLearning::get_collisions(std::string world_name) {
+  
+  if(world_name == "world") {
+
+    // number of obstacles :
+    std::size_t n_obsatcles = 9;
+
+    // x axis collisions :
+    std::size_t col_x_n = 3;
+    float *col_x = linspace<float>(-1.0, +1.0, col_x_n);
+
+    // y axis collisions :
+    std::size_t col_y_n = 3;
+    float *col_y = linspace<float>(-1.0, +1.0, col_y_n);
+
+    // all of theta space :
+    std::size_t col_theta_n = this->theta_space_size;
+    float *col_theta = linspace<float>(- _PI_NUMBER_, + _PI_NUMBER_, col_theta_n);
+
+    // collision_pairs matrix row, col size :
+    std::size_t collisions_row = n_obsatcles * col_theta_n;
+    std::size_t collisions_col = 3;
+
+    // allocate memory for the collision_pairs matrix :
+    float **collision_pairs = new float*[collisions_row];
+    for (std::size_t i = 0; i < collisions_row; i++) {
+        collision_pairs[i] = new float[collisions_col];
+    }
+
+    for(std::size_t i = 0; i < col_x_n; i++) {
+      for(std::size_t j = 0; j < col_y_n; j++) {
+        for(std::size_t k = 0; k < col_theta_n; k++) {
+          std::size_t index = i * (col_y_n * col_theta_n) + j * col_theta_n + k;
+          *(*(collision_pairs + index) + 0) = col_x[i];
+          *(*(collision_pairs + index) + 1) = col_y[j];
+          *(*(collision_pairs + index) + 2) = col_theta[k];
+        }
+      }
+    }
+  delete[] col_x;
+  delete[] col_y;
+  delete[] col_theta;
+  return collision_pairs;
+  }
+  else if(world_name == "house") {
+    // house code
+  }
+  else {
+    // error
+  }
 }
 
 float *QLearning::get_action_values(double reward[], double actions_count[]){
