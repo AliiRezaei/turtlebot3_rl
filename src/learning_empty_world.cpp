@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <chrono>
 
 int main(int argc, char **argv) {
 
@@ -91,9 +92,14 @@ int main(int argc, char **argv) {
     // reward per episode :
     float rpe = 0.0;
 
+
+    // learning process start time :
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    // maybe used in loop :
     int i = 0;
     // learning loop :
-    for(int e=0; e<n_episodes; e++) {
+    for(int e=1; e<=n_episodes; e++) {
         
         // select a random state :
         int random_row = rl.randGenerator.randInteger(0, n_all_states - 1);
@@ -163,6 +169,13 @@ int main(int argc, char **argv) {
         epsilon = epsilon * 0.97;
     }
 
+    // learning process end time :
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_time - start_time;
+
+    // display learning process time taken :
+    std::cout << "Learning process has been completed in " << duration.count() << " seconds!" << std::endl;
+
     // // create a text file for log learning process :
     // std::ofstream learning_data;
 
@@ -185,122 +198,122 @@ int main(int argc, char **argv) {
     // // save and close file:
     // learning_data.close();
 
-    // init node :
-    ros::init(argc, argv, "main_empty_world_node");
+    // // init node :
+    // ros::init(argc, argv, "main_empty_world_node");
     
-    // TurtleBot3 object :
-    TurtleBot3 robot;
+    // // TurtleBot3 object :
+    // TurtleBot3 robot;
 
-    // start pose :
-    float p[] = {0.0, 0.0, 0.0};
-    float *pose = p;
+    // // start pose :
+    // float p[] = {0.0, 0.0, 0.0};
+    // float *pose = p;
 
-    float x_test;
-    float y_test;
-    float theta_test;
+    // float x_test;
+    // float y_test;
+    // float theta_test;
 
-    float x_new_test;
-    float y_new_test;
-    float theta_new_test;
+    // float x_new_test;
+    // float y_new_test;
+    // float theta_new_test;
 
-    float x_space_precise_test = (x.max - x.min) / (x.n - 1.0);
-    float y_space_precise_test = (y.max - y.min) / (y.n - 1.0);
-    float theta_space_precise_test = (theta.max - theta.min) / (theta.n - 1.0);
+    // float x_space_precise_test = (x.max - x.min) / (x.n - 1.0);
+    // float y_space_precise_test = (y.max - y.min) / (y.n - 1.0);
+    // float theta_space_precise_test = (theta.max - theta.min) / (theta.n - 1.0);
 
-    while(ros::ok()) {
+    // while(ros::ok()) {
 
-        // search pose in all states :
-        state_idx = ismember<float>(pose, all_states, n_all_states, n_columns);
-        action = *(policy + state_idx);
+    //     // search pose in all states :
+    //     state_idx = ismember<float>(pose, all_states, n_all_states, n_columns);
+    //     action = *(policy + state_idx);
 
-        x_test     = *(pose + 0);
-        y_test     = *(pose + 1);
-        theta_test = *(pose + 2);   
+    //     x_test     = *(pose + 0);
+    //     y_test     = *(pose + 1);
+    //     theta_test = *(pose + 2);   
         
-        float r1;
-        float r2;
+    //     float r1;
+    //     float r2;
 
-        float eps = 0.01;
+    //     float eps = 0.01;
 
-        if(fabs(theta_test + _PI_NUMBER_) < eps) {
-          r1 = - 1.0;
-          r2 =   0.0;
-        }
-        else if(fabs(theta_test + 3 * _PI_NUMBER_ / 4.0) < eps) {
-          r1 = - 1.0;
-          r2 = - 1.0;
-        }
-        else if(fabs(theta_test + _PI_NUMBER_ / 2.0) < eps) {
-          r1 =   0.0;
-          r2 = - 1.0;
-        }
-        else if(fabs(theta_test + _PI_NUMBER_ / 4.0) < eps) {
-          r1 =   1.0;
-          r2 = - 1.0;
-        }
-        else if(fabs(theta_test) < eps) {
-          r1 =   1.0;
-          r2 =   0.0;
-        }
-        else if(fabs(theta_test - _PI_NUMBER_ / 4.0) < eps) {
-          r1 =   1.0;
-          r2 =   1.0;
-        }
-        else if(fabs(theta_test - _PI_NUMBER_ / 2.0) < eps) {
-          r1 =   0.0;
-          r2 =   1.0;
-        }
-        else if(fabs(theta_test - 3 * _PI_NUMBER_ / 4.0) < eps) {
-          r1 = - 1.0;
-          r2 =   1.0;
-        }
-        else if(fabs(theta_test - _PI_NUMBER_) < eps) {
-          r1 = - 1.0;
-          r2 =   0.0;
-        }
-        else {
-          std::cout << "Are You Joking?!" << std::endl;
-        }   
-        switch (action)
-        {
-        case 0:
-          // move forward in theta direcction :
-          x_new_test = x_test + x_space_precise_test * r1;
-          y_new_test = y_test + y_space_precise_test * r2;
-          theta_new_test = theta_test;
-          robot.move_forward_meters(sqrt(r1*r1 + r2*r2) * x_space_precise_test);
-          break;
+    //     if(fabs(theta_test + _PI_NUMBER_) < eps) {
+    //       r1 = - 1.0;
+    //       r2 =   0.0;
+    //     }
+    //     else if(fabs(theta_test + 3 * _PI_NUMBER_ / 4.0) < eps) {
+    //       r1 = - 1.0;
+    //       r2 = - 1.0;
+    //     }
+    //     else if(fabs(theta_test + _PI_NUMBER_ / 2.0) < eps) {
+    //       r1 =   0.0;
+    //       r2 = - 1.0;
+    //     }
+    //     else if(fabs(theta_test + _PI_NUMBER_ / 4.0) < eps) {
+    //       r1 =   1.0;
+    //       r2 = - 1.0;
+    //     }
+    //     else if(fabs(theta_test) < eps) {
+    //       r1 =   1.0;
+    //       r2 =   0.0;
+    //     }
+    //     else if(fabs(theta_test - _PI_NUMBER_ / 4.0) < eps) {
+    //       r1 =   1.0;
+    //       r2 =   1.0;
+    //     }
+    //     else if(fabs(theta_test - _PI_NUMBER_ / 2.0) < eps) {
+    //       r1 =   0.0;
+    //       r2 =   1.0;
+    //     }
+    //     else if(fabs(theta_test - 3 * _PI_NUMBER_ / 4.0) < eps) {
+    //       r1 = - 1.0;
+    //       r2 =   1.0;
+    //     }
+    //     else if(fabs(theta_test - _PI_NUMBER_) < eps) {
+    //       r1 = - 1.0;
+    //       r2 =   0.0;
+    //     }
+    //     else {
+    //       std::cout << "Are You Joking?!" << std::endl;
+    //     }   
+    //     switch (action)
+    //     {
+    //     case 0:
+    //       // move forward in theta direcction :
+    //       x_new_test = x_test + x_space_precise_test * r1;
+    //       y_new_test = y_test + y_space_precise_test * r2;
+    //       theta_new_test = theta_test;
+    //       robot.move_forward_meters(sqrt(r1*r1 + r2*r2) * x_space_precise_test);
+    //       break;
 
-        case 1:
-          // turn cw :
-          x_new_test = x_test;
-          y_new_test = y_test;
-          theta_new_test = theta_test - theta_space_precise_test;
-          robot.turn_in_radians(-theta_space_precise_test);
-          break;
+    //     case 1:
+    //       // turn cw :
+    //       x_new_test = x_test;
+    //       y_new_test = y_test;
+    //       theta_new_test = theta_test - theta_space_precise_test;
+    //       robot.turn_in_radians(-theta_space_precise_test);
+    //       break;
 
-        case 2:
-          // turn ccw :
-          x_new_test = x_test;
-          y_new_test = y_test;
-          theta_new_test = theta_test + theta_space_precise_test;
-          robot.turn_in_radians(+theta_space_precise_test);
-          break;
+    //     case 2:
+    //       // turn ccw :
+    //       x_new_test = x_test;
+    //       y_new_test = y_test;
+    //       theta_new_test = theta_test + theta_space_precise_test;
+    //       robot.turn_in_radians(+theta_space_precise_test);
+    //       break;
 
-        default:
-          x_new_test = x_test;
-          y_new_test = y_test;
-          theta_new_test = theta_test;
-          break;
-        }
-        *(pose + 0) = x_new_test;
-        *(pose + 1) = y_new_test;
-        *(pose + 2) = theta_new_test;
-        // check reach goal state :
-        if(*(pose + 0) == *(goal + 0) && *(pose + 1) == *(goal + 1)) {
-          break;
-        }
-    }
+    //     default:
+    //       x_new_test = x_test;
+    //       y_new_test = y_test;
+    //       theta_new_test = theta_test;
+    //       break;
+    //     }
+    //     *(pose + 0) = x_new_test;
+    //     *(pose + 1) = y_new_test;
+    //     *(pose + 2) = theta_new_test;
+    //     // check reach goal state :
+    //     if(*(pose + 0) == *(goal + 0) && *(pose + 1) == *(goal + 1)) {
+    //       break;
+    //     }
+    // }
 
     return 0;
 }

@@ -124,3 +124,62 @@ int main(int argc, char **argv) {
     // }
     return 0;
 }
+
+// #include <iostream>
+// #include <fstream>
+// #include <sstream>
+// #include <vector>
+
+// int main() {
+//     // Variables to store header information
+//     double gamma = 0.0, alpha = 0.0;
+//     int episodes = 0, n_actions = 0, n_states = 0, n_state_action_pairs = 0;
+
+//     // Vectors to store the columns
+//     std::vector<int> row, actions, best_action;
+//     std::vector<double> x, y, theta, q_table;
+
+//     // Open the file
+//     std::ifstream infile("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/data_empty_world.txt");
+//     std::string line;
+
+//     // Read the header information
+//     if (std::getline(infile, line)) {
+//         std::stringstream ss(line);
+//         std::string temp;
+
+//         // Extract variables from the first line
+//         ss >> temp >> gamma >> temp >> alpha >> temp >> temp >> episodes;
+//         std::getline(infile, line);  // Skip the next line (column headers)
+//         std::getline(infile, line);  // Read the third line with n actions, n states, etc.
+//         std::stringstream ss2(line);
+//         ss2 >> temp >> temp >> temp >> n_actions >> temp >> temp >> temp >> n_states >> temp >> temp >> temp >> n_state_action_pairs;
+//     }
+
+//     // Read the data rows
+//     while (std::getline(infile, line)) {
+//         std::stringstream ss(line);
+//         int r, act, b_act;
+//         double x_val, y_val, theta_val, q_val;
+
+//         ss >> r >> x_val >> y_val >> theta_val >> act >> b_act >> q_val;
+
+//         // Store data in vectors
+//         row.push_back(r);
+//         x.push_back(x_val);
+//         y.push_back(y_val);
+//         theta.push_back(theta_val);
+//         actions.push_back(act);
+//         best_action.push_back(b_act);
+//         q_table.push_back(q_val);
+//     }
+
+//     infile.close();
+
+//     // Now you can use the extracted data
+//     // For example, printing some of the data:
+//     std::cout << "Gamma: " << gamma << ", Alpha: " << alpha << ", Episodes: " << episodes << std::endl;
+//     std::cout << "First row data: x=" << x[0] << ", y=" << y[0] << ", theta=" << theta[0] << std::endl;
+
+//     return 0;
+// }
