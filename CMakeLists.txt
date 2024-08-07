@@ -140,8 +140,8 @@ include_directories(
 # )
 
 add_library(${PROJECT_NAME}
-  src/TurtleMove.cpp
-  # src/Tollbox.cpp
+  # src/TurtleMove.cpp
+  # src/Toolbox.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
@@ -157,50 +157,23 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 # add_executable(${PROJECT_NAME}_node src/turtlebot3_rl_node.cpp)
 
 
-
-
-
-# add_executable(TurtleMoveTest src/TurtleMove.cpp)
-# target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
-
-
-
-add_executable(myTestCode src/myTestCode.cpp)
-target_link_libraries(myTestCode ${catkin_LIBRARIES})
-
-add_executable(main src/main.cpp)
-target_link_libraries(main ${catkin_LIBRARIES})
-
-add_executable(toolbox_test src/toolbox_test.cpp)
-target_link_libraries(toolbox_test ${catkin_LIBRARIES})
-
-add_executable(turtlebot3_class_test src/turtlebot3_class_test.cpp)
-target_link_libraries(turtlebot3_class_test ${catkin_LIBRARIES})
-
 add_executable(learning_empty_world src/learning_empty_world.cpp)
 target_link_libraries(learning_empty_world ${catkin_LIBRARIES})
 
 add_executable(main_empty_world src/main_empty_world.cpp)
 target_link_libraries(main_empty_world ${catkin_LIBRARIES})
 
-add_executable(main_world src/main_world.cpp)
-target_link_libraries(main_world ${catkin_LIBRARIES})
-
 add_executable(learning_world src/learning_world.cpp)
 target_link_libraries(learning_world ${catkin_LIBRARIES})
+
+add_executable(main_world src/main_world.cpp)
+target_link_libraries(main_world ${catkin_LIBRARIES})
 
 add_executable(learning_house src/learning_house.cpp)
 target_link_libraries(learning_house ${catkin_LIBRARIES})
 
 add_executable(main_house src/main_house.cpp)
 target_link_libraries(main_house ${catkin_LIBRARIES})
-
-# add_executable(TurtleMoveTest src/TurtleMove.cpp)
-# target_link_libraries(TurtleMoveTest ${catkin_LIBRARIES})
-
-
-
-
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
