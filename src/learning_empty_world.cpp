@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <chrono>
 
 int main(int argc, char **argv) {
 
@@ -18,13 +19,13 @@ int main(int argc, char **argv) {
 
     // state space info :
     struct stateInfo x;
-    x.min = -5.0;
-    x.max = +5.0;
+    x.min = -2.5;
+    x.max = +2.5;
     x.n   =  11;
     
     struct stateInfo y;
-    y.min = -5.0;
-    y.max = +5.0;
+    y.min = -2.5;
+    y.max = +2.5;
     y.n   =  11;
 
     struct stateInfo theta;
@@ -43,15 +44,15 @@ int main(int argc, char **argv) {
     std::size_t n_columns_action_pairs = n_columns + 1;
 
     // learning params :
-    int   n_episodes = 20000;
+    int   n_episodes = 30000;
     float gamma      = 0.990;
     float alpha      = 0.100;
 
     // goal selection :
-    float  goal_state[] = {2.0, -3.0};
+    float  goal_state[] = {-0.5, 2.5};
     float *goal = goal_state;
 
-    // initialize polices :
+    // initialize policy :
     int *policy = rl.get_random_policy(n_all_states);
 
     // initialize q table :
@@ -91,9 +92,15 @@ int main(int argc, char **argv) {
     // reward per episode :
     float rpe = 0.0;
 
+
+    // learning process start time :
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    // maybe used in loop :
     int i = 0;
+
     // learning loop :
-    for(int e=0; e<n_episodes; e++) {
+    for(int e=1; e<=n_episodes; e++) {
         
         // select a random state :
         int random_row = rl.randGenerator.randInteger(0, n_all_states - 1);
@@ -162,6 +169,13 @@ int main(int argc, char **argv) {
         std::cout << "Episode : " << e << "\t" << "Reward per Episode : " << rpe << std::endl;
         epsilon = epsilon * 0.97;
     }
+
+    // learning process end time :
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_time - start_time;
+
+    // display learning process time taken :
+    std::cout << "Learning process has been completed in " << duration.count() << " seconds!" << std::endl;
 
     // // create a text file for log learning process :
     // std::ofstream learning_data;

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <chrono>
 
 int main(int argc, char **argv) {
 
@@ -47,7 +48,7 @@ int main(int argc, char **argv) {
     std::size_t n_columns_action_pairs = n_columns + 1;
 
     // learning params :
-    int   n_episodes = 30000;
+    int   n_episodes = 40000;
     float gamma      = 0.990;
     float alpha      = 0.100;
 
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
     float  goal_state[] = {-6.5, 0.5};
     float *goal = goal_state;
 
-    // initialize polices :
+    // initialize policy :
     int *policy = rl.get_random_policy(n_all_states);
 
     // initialize q table :
@@ -98,9 +99,14 @@ int main(int argc, char **argv) {
     // reward per episode :
     float rpe = 0.0;
 
+    // learning process start time :
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    // maybe used in loop :
     int i = 0;
+
     // learning loop :
-    for(int e=0; e<n_episodes; e++) {
+    for(int e=1; e<=n_episodes; e++) {
         
         // select a random state :
         int random_row = rl.randGenerator.randInteger(0, n_all_states - 1);
@@ -177,11 +183,18 @@ int main(int argc, char **argv) {
         epsilon = epsilon * 0.97;
     }
 
+    // learning process end time :
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_time - start_time;
+
+    // display learning process time taken :
+    std::cout << "Learning process has been completed in " << duration.count() << " seconds!" << std::endl;
+
     // // create a text file for log learning process :
     // std::ofstream learning_data;
 
     // // file path :
-    // learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/data_world.txt");
+    // learning_data.open("/home/ali/catkin_ws/src/turtlebot3_rl/LogData/data_house.txt");
     
     // // log algorithm params :
     // learning_data << "Gamma     = " << gamma << " , " << "alpha    = " << alpha << " , " << "episodes            = " << n_episodes << std::endl;
@@ -200,7 +213,7 @@ int main(int argc, char **argv) {
     // learning_data.close();
 
     // init node :
-    ros::init(argc, argv, "main_empty_world_node");
+    ros::init(argc, argv, "main_house_node");
     
     // TurtleBot3 object :
     TurtleBot3 robot;

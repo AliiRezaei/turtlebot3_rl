@@ -225,7 +225,7 @@ void TurtleBot3::move_forward(int time) {
 
 void TurtleBot3::move_forward_meters(float meters) {
   // rate of publishing:
-  ros::Rate rate(30);
+  ros::Rate rate(25);
 
   // target position and stop criteria:
   float x_start = x_pos;
@@ -240,7 +240,7 @@ void TurtleBot3::move_forward_meters(float meters) {
     // Calculate the current distance traveled
     distance_traveled = sqrt((x_pos - x_start) * (x_pos - x_start) + (y_pos - y_start) * (y_pos - y_start));
 
-    vel_msg.linear.x = 0.2;
+    vel_msg.linear.x = 0.15;
     vel_msg.linear.y = 0.0;
     vel_msg.angular.z = 0.0;
     vel_pub.publish(vel_msg);
@@ -359,7 +359,7 @@ void TurtleBot3::turn_degree(float deg) {
 
 void TurtleBot3::turn_in_radians(float rad) {
   // Rate of publishing
-  ros::Rate rate(30);
+  ros::Rate rate(25);
 
   // Calculate target angle in radians
   double theta_target = yaw + rad;
@@ -367,7 +367,7 @@ void TurtleBot3::turn_in_radians(float rad) {
 
   // Set the direction of rotation
   int sign_theta = (rad > 0.0) ? 1 : -1;
-  double eps = 0.01; // Tolerance for the stopping condition
+  double eps = 0.008; // Tolerance for the stopping condition
 
   // Continue turning until the target angle is reached
   while (true) {
@@ -384,7 +384,7 @@ void TurtleBot3::turn_in_radians(float rad) {
     // Set the rotation velocity
     vel_msg.linear.x = 0.0;
     vel_msg.linear.y = 0.0;
-    vel_msg.angular.z = sign_theta * 0.35;
+    vel_msg.angular.z = sign_theta * 0.20;
 
     // Publish the velocity message
     vel_pub.publish(vel_msg);
